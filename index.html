@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiver Zeitstrahl - Thomas Mann</title>
+    <style>
+        /* ====== Grundlegende Stile ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ====== Kopfbereich ====== */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* ====== Zeitstrahl Struktur ====== */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* Vertikale Linie in der Mitte */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+        }
+
+        /* ====== Zeitleisten-Einträge ====== */
+        .timeline-item {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        /* Linke und rechte Seite alternieren */
+        .timeline-item:nth-child(odd) {
+            padding-right: calc(50% + 30px);
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) {
+            padding-left: calc(50% + 30px);
+            text-align: left;
+        }
+
+        /* Verbindungspunkt (Kreis) */
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Punkt vergrößert sich beim Hovern */
+        .timeline-item::before:hover {
+            width: 28px;
+            height: 28px;
+            transform: translateX(-50%);
+            border-color: #764ba2;
+            background: #667eea;
+        }
+
+        /* ====== Inhalts-Karten ====== */
+        .timeline-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: 100%;
+        }
+
+        .timeline-content:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .timeline-content.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* ====== Jahr / Datum ====== */
+        .year {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content.active .year {
+            color: #fff;
+        }
+
+        /* ====== Ereignis-Titel ====== */
+        .event-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .timeline-content.active .event-title {
+            color: white;
+        }
+
+        /* ====== Beschreibung ====== */
+        .description {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #666;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .timeline-content.active .description {
+            max-height: 500px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* ====== Responsive Design ====== */
+        @media (max-width: 768px) {
+            /* Auf Mobilgeräten: alles auf einer Seite */
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(odd),
+            .timeline-item:nth-child(even) {
+                padding-left: 70px;
+                padding-right: 0;
+                text-align: left;
+            }
+
+            .timeline-item::before {
+                left: 20px;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .timeline-content {
+                padding: 20px;
+            }
+
+            .event-title {
+                font-size: 1.1em;
+            }
+        }
+
+        /* ====== Schaltfläche zum Scrollen ====== */
+        .scroll-indicator {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Kopfbereich mit Titel -->
+        <header>
+            <h1>Interaktiver Zeitstrahl</h1>
+            <p>Klicke auf die Events, um mehr Informationen zu sehen</p>
+        </header>
+
+        <!-- Hauptzeitstrahl -->
+        <div class="timeline">
+            <!-- Zeitleisten-Eintrag 1 -->
+            <div class="timeline-item">
+                <div class="timeline-content" onclick="toggleContent(this)">
+                    <div class="year">Jahr</div>
+                    <div class="event-title">Event Titel</div>
+                    <div class="description">
+                        Beschreibung des Events...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zeitleisten-Eintrag 2 -->
+            <div class="timeline-item">
+                <div class="timeline-content" onclick="toggleContent(this)">
+                    <div class="year">Jahr</div>
+                    <div class="event-title">Event Titel</div>
+                    <div class="description">
+                        Beschreibung des Events...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zeitleisten-Eintrag 3 -->
+            <div class="timeline-item">
+                <div class="timeline-content" onclick="toggleContent(this)">
+                    <div class="year">Jahr</div>
+                    <div class="event-title">Event Titel</div>
+                    <div class="description">
+                        Beschreibung des Events...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zeitleisten-Eintrag 4 -->
+            <div class="timeline-item">
+                <div class="timeline-content" onclick="toggleContent(this)">
+                    <div class="year">Jahr</div>
+                    <div class="event-title">Event Titel</div>
+                    <div class="description">
+                        Beschreibung des Events...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zeitleisten-Eintrag 5 -->
+            <div class="timeline-item">
+                <div class="timeline-content" onclick="toggleContent(this)">
+                    <div class="year">Jahr</div>
+                    <div class="event-title">Event Titel</div>
+                    <div class="description">
+                        Beschreibung des Events...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Du kannst weitere Einträge hier hinzufügen! -->
+
+        </div>
+
+        <div class="scroll-indicator">
+            ↓ Scrolle nach unten für mehr Events ↓
+        </div>
+    </div>
+
+    <script>
+        // ====== JavaScript für Interaktivität ======
+
+        /**
+         * Funktion zum Umschalten der Anzeige von Beschreibungen
+         * @param {Element} element - Das geklickte Element
+         */
+        function toggleContent(element) {
+            // Entferne die "active" Klasse von allen anderen Elementen
+            const allItems = document.querySelectorAll('.timeline-content');
+            allItems.forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Schalte die "active" Klasse des geklickten Elements um
+            element.classList.toggle('active');
+        }
+
+        /**
+         * Funktion zum Schließen aller offenen Beschreibungen
+         * wenn irgendwo außerhalb geklickt wird
+         */
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.timeline-content')) {
+                document.querySelectorAll('.timeline-content').forEach(item => {
+                    item.classList.remove('active');
+                });
+            }
+        });
+
+        // ====== Optionale: Animationen beim Laden ======
+        /**
+         * Füge eine sanfte Animation hinzu, wenn die Seite geladen wird
+         */
+        window.addEventListener('load', function() {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            timelineItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.animation = `fadeIn 0.6s ease forwards`;
+                item.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // CSS Animation definieren
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
