@@ -21,7 +21,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
         }
 
@@ -42,165 +42,392 @@
             opacity: 0.9;
         }
 
-        /* ====== Zeitstrahl Struktur ====== */
-        .timeline {
-            position: relative;
-            padding: 20px 0;
+        .subheader {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            color: white;
+            line-height: 1.6;
+            font-size: 0.95em;
         }
 
-        /* Vertikale Linie in der Mitte */
+        /* ====== Filter-Buttons ====== */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .filter-btn {
+            background: white;
+            color: #333;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* ====== Horizontale Zeitstrahl Struktur ====== */
+        .timeline {
+            position: relative;
+            padding: 60px 0;
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        /* Horizontale Linie */
         .timeline::before {
             content: '';
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0;
+            right: 0;
+            height: 4px;
             background: white;
             border-radius: 2px;
+            z-index: 1;
         }
 
         /* ====== Zeitleisten-Einträge ====== */
         .timeline-item {
-            margin-bottom: 40px;
             position: relative;
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+            min-width: 150px;
+            height: 120px;
         }
 
-        /* Linke und rechte Seite alternieren */
+        /* Ungerade Items: unten */
         .timeline-item:nth-child(odd) {
-            padding-right: calc(50% + 30px);
-            text-align: right;
+            align-items: flex-end;
         }
 
+        /* Gerade Items: oben */
         .timeline-item:nth-child(even) {
-            padding-left: calc(50% + 30px);
-            text-align: left;
+            align-items: flex-start;
         }
 
-        /* Verbindungspunkt (Kreis) */
+        /* Verbindungspunkt (Kreis) - entfernt */
         .timeline-item::before {
+            display: none;
+        }
+
+        /* Vertikale Verbindungslinie */
+        .timeline-item::after {
             content: '';
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
+            width: 2px;
+            background: white;
+            z-index: 2;
+        }
+
+        /* Ungerade Items: Linie nach unten */
+        .timeline-item:nth-child(odd)::after {
+            top: 50%;
             height: 20px;
-            background: white;
-            border: 4px solid #667eea;
-            border-radius: 50%;
-            top: 0;
-            z-index: 10;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        /* Punkt vergrößert sich beim Hovern */
-        .timeline-item::before:hover {
-            width: 28px;
-            height: 28px;
-            transform: translateX(-50%);
-            border-color: #764ba2;
-            background: #667eea;
+        /* Gerade Items: Linie nach oben */
+        .timeline-item:nth-child(even)::after {
+            bottom: 50%;
+            height: 20px;
         }
 
-        /* ====== Inhalts-Karten ====== */
-        .timeline-content {
+        /* ====== Karten mit Jahr ====== */
+        .timeline-card {
             background: white;
-            padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: all 0.3s ease;
-            max-width: 100%;
+            width: 120px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -40px 0;
         }
 
-        .timeline-content:hover {
+        .timeline-card:hover {
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            transform: translateY(-5px);
+            transform: scale(1.1);
         }
 
-        .timeline-content.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        /* Bild in der Karte */
+        .card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
         }
 
-        /* ====== Jahr / Datum ====== */
-        .year {
+        /* Jahr in der Karte */
+        .card-year {
             font-size: 1.8em;
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 8px;
         }
 
-        .timeline-content.active .year {
-            color: #fff;
-        }
-
-        /* ====== Ereignis-Titel ====== */
-        .event-title {
-            font-size: 1.3em;
+        .card-category {
+            font-size: 0.7em;
             font-weight: 600;
+            margin-top: 8px;
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Kategoriefarben */
+        .category-Thomas-Mann { background: #667eea; }
+        .category-Literatur { background: #764ba2; }
+        .category-Faschismus { background: #d63031; }
+        .category-Italienischer-Faschismus { background: #e17055; }
+        .category-Historischer-Kontext { background: #0984e3; }
+        .category-Gesellschaftskritik { background: #6c5ce7; }
+        .category-Warnung-wird-Wirklichkeit { background: #a29bfe; }
+        .category-Nachkrieg { background: #55efc4; }
+
+        /* ====== Modal für Details ====== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #764ba2;
+        }
+
+        .modal-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        .modal-year {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
             margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 15px;
             color: #333;
         }
 
-        .timeline-content.active .event-title {
-            color: white;
-        }
-
-        /* ====== Beschreibung ====== */
-        .description {
+        .modal-description {
             font-size: 0.95em;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #666;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+            margin-bottom: 20px;
         }
 
-        .timeline-content.active .description {
-            max-height: 500px;
-            color: rgba(255, 255, 255, 0.95);
+        .modal-category {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .modal-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .modal-section-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .modal-quote {
+            font-style: italic;
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            color: #333;
+            border-radius: 4px;
         }
 
         /* ====== Responsive Design ====== */
         @media (max-width: 768px) {
-            /* Auf Mobilgeräten: alles auf einer Seite */
-            .timeline::before {
-                left: 20px;
-            }
-
-            .timeline-item,
-            .timeline-item:nth-child(odd),
-            .timeline-item:nth-child(even) {
-                padding-left: 70px;
-                padding-right: 0;
-                text-align: left;
-            }
-
-            .timeline-item::before {
-                left: 20px;
+            .container {
+                max-width: 100%;
             }
 
             header h1 {
                 font-size: 1.8em;
             }
 
-            .timeline-content {
-                padding: 20px;
+            .timeline {
+                padding: 50px 0;
+                gap: 30px;
             }
 
-            .event-title {
-                font-size: 1.1em;
+            .timeline-item {
+                min-width: 140px;
+                height: 180px;
+            }
+
+            .timeline-item:nth-child(odd) {
+                padding-bottom: 50px;
+            }
+
+            .timeline-item:nth-child(even) {
+                padding-top: 50px;
+            }
+
+            .timeline-card {
+                width: 100px;
+                padding: 15px;
+            }
+
+            .card-year {
+                font-size: 1.3em;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .filter-container {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
             }
         }
 
-        /* ====== Schaltfläche zum Scrollen ====== */
-        .scroll-indicator {
-            text-align: center;
-            margin-top: 40px;
+        /* ====== Footer/Legende ====== */
+        .legend {
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
             color: white;
+            text-align: center;
+        }
+
+        .legend h3 {
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            text-align: left;
+        }
+
+        .legend-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid white;
+        }
+
+        .legend-item-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .legend-item-text {
             font-size: 0.9em;
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -208,136 +435,333 @@
     <div class="container">
         <!-- Kopfbereich mit Titel -->
         <header>
-            <h1>Interaktiver Zeitstrahl</h1>
-            <p>Klicke auf die Events, um mehr Informationen zu sehen</p>
+            <h1>Zeitstrahl: Thomas Mann</h1>
+            <p>Die Novelle "Der Tod in Venedig" im Spiegel von Geschichte und Faschismus</p>
         </header>
 
-        <!-- Hauptzeitstrahl -->
-        <div class="timeline">
-            <!-- Zeitleisten-Eintrag 1 -->
-            <div class="timeline-item">
-                <div class="timeline-content" onclick="toggleContent(this)">
-                    <div class="year">Jahr</div>
-                    <div class="event-title">Event Titel</div>
-                    <div class="description">
-                        Beschreibung des Events...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Zeitleisten-Eintrag 2 -->
-            <div class="timeline-item">
-                <div class="timeline-content" onclick="toggleContent(this)">
-                    <div class="year">Jahr</div>
-                    <div class="event-title">Event Titel</div>
-                    <div class="description">
-                        Beschreibung des Events...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Zeitleisten-Eintrag 3 -->
-            <div class="timeline-item">
-                <div class="timeline-content" onclick="toggleContent(this)">
-                    <div class="year">Jahr</div>
-                    <div class="event-title">Event Titel</div>
-                    <div class="description">
-                        Beschreibung des Events...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Zeitleisten-Eintrag 4 -->
-            <div class="timeline-item">
-                <div class="timeline-content" onclick="toggleContent(this)">
-                    <div class="year">Jahr</div>
-                    <div class="event-title">Event Titel</div>
-                    <div class="description">
-                        Beschreibung des Events...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Zeitleisten-Eintrag 5 -->
-            <div class="timeline-item">
-                <div class="timeline-content" onclick="toggleContent(this)">
-                    <div class="year">Jahr</div>
-                    <div class="event-title">Event Titel</div>
-                    <div class="description">
-                        Beschreibung des Events...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Du kannst weitere Einträge hier hinzufügen! -->
-
+        <!-- Einführungstext -->
+        <div class="subheader">
+            <strong>🎯 Zentrale Leitfrage:</strong> Warum ist der historische Hintergrund wichtig für die Novelle?<br><br>
+            Diese Zeitleiste verbindet die literarische Welt von Thomas Mann mit der politischen Realität seiner Zeit. 
+            Sie zeigt, wie Manns Novelle "Der Tod in Venedig" (1912) als <strong>versteckte Warnung vor den Gefahren der Faschismus</strong> verstanden werden kann. 
+            Der Verfall des Protagonisten Aschenbach spiegelt den Verfall der europäischen Zivilisation vor dem Aufstieg des Faschismus.
         </div>
 
-        <div class="scroll-indicator">
-            ↓ Scrolle nach unten für mehr Events ↓
+        <!-- Filter -->
+        <div class="filter-container" id="filterContainer">
+            <!-- Wird durch JavaScript generiert -->
+        </div>
+
+        <!-- Hauptzeitstrahl -->
+        <div class="timeline" id="timeline">
+            <!-- Die Einträge werden durch JavaScript generiert -->
+        </div>
+
+        <!-- Legende und Erklärungen -->
+        <div class="legend">
+            <h3>ℹ️ Leitfaden zur Zeitleiste</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-item-title">📖 Thomas Mann</div>
+                    <div class="legend-item-text">Lebensstationen und literarische Werke des Autors</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-item-title">✍️ Literatur / Warnung</div>
+                    <div class="legend-item-text">Manns Werke und ihre Bedeutung als Warnung</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-item-title">🇮🇹 Italienischer Faschismus</div>
+                    <div class="legend-item-text">Historische Ereignisse in Italien unter Mussolini</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-item-title">⚡ Historischer Kontext</div>
+                    <div class="legend-item-text">Weitere historische Ereignisse, die relevant sind</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-item-title">💭 Gesellschaftskritik</div>
+                    <div class="legend-item-text">Manns Kritik an faschistischen Tendenzen</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-item-title">🚨 Warnung wird Wirklichkeit</div>
+                    <div class="legend-item-text">Erfüllung von Manns Prophezeiungen</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal für Details -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+                <div class="modal-category" id="modalCategory"></div>
+                <img class="modal-image" id="modalImage" src="" alt="Event Bild">
+                <div class="modal-year" id="modalYear"></div>
+                <div class="modal-title" id="modalTitle"></div>
+                <div class="modal-description" id="modalDescription"></div>
+                
+                <div class="modal-section" id="novelConnectionSection" style="display: none;">
+                    <div class="modal-section-title">Verbindung zur Novelle</div>
+                    <div id="modalNovelConnection"></div>
+                </div>
+
+                <div class="modal-section" id="quoteSection" style="display: none;">
+                    <div class="modal-section-title">Zitat</div>
+                    <div class="modal-quote" id="modalQuote"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ====== JavaScript für Interaktivität ======
+        // ====== Zeitstrahl-Daten ======
+        const timelineData = [
+            {
+                year: '1875',
+                category: 'Thomas Mann',
+                image: 'https://via.placeholder.com/250x180?text=Thomas+Mann+Geburt',
+                title: 'Geburt Thomas Manns',
+                description: 'Thomas Mann wird am 6. Juni 1875 in Lübeck geboren. Aufwachsen in einer wohlhabenden Kaufmannsfamilie prägt sein Werk.',
+                novelConnection: 'Manns Elternhaus formt seinen kritischen Blick auf Gesellschaft und Dekadenz'
+            },
+            {
+                year: '1901',
+                category: 'Literatur',
+                image: 'https://via.placeholder.com/250x180?text=Buddenbrooks',
+                title: 'Buddenbrooks veröffentlicht',
+                description: 'Thomas Manns Meisterwerk über den Niedergang einer Kaufmannsfamilie wird veröffentlicht. Der Roman behandelt Themen von Verfall und Dekadenz.',
+                novelConnection: 'Präludium zu "Der Tod in Venedig" – beide Werke beschäftigen sich mit Verfall und innerer Zerstörung'
+            },
+            {
+                year: '1910',
+                category: 'Italienischer Faschismus',
+                image: 'https://via.placeholder.com/250x180?text=Prä-Faschismus+Italien',
+                title: 'Italien unter Spannungen',
+                description: 'Italien durchlebt politische und soziale Umwälzungen. Anarchisten und Sozialisten fordern radikale Veränderungen.',
+                novelConnection: 'Venedig ist Symbol einer untergehenden Kulturwelt – das Chaos außen spiegelt sich in der Stadt'
+            },
+            {
+                year: '1912',
+                category: 'Literatur / Warnung',
+                image: 'https://via.placeholder.com/250x180?text=Der+Tod+in+Venedig',
+                title: 'Der Tod in Venedig - Veröffentlichung',
+                description: 'Thomas Manns Novelle wird veröffentlicht. Sie erzählt vom Tod eines angesehenen Schriftstellers in Venedig, der Verführung unterliegt. Eine versteckte Warnung vor dem Verlust von Würde und Kontrolle.',
+                novelConnection: 'ZENTRAL: Die Novelle warnt vor dem Zusammenbruch von Vernunft und Zivilisation. Aschenbach ist Symbol für eine untergehende bürgerliche Kultur.',
+                quote: '\"Der Wille war gelähmt, Schande und Wollust zogen ihn nach unten.\"'
+            },
+            {
+                year: '1914',
+                category: 'Historischer Kontext',
+                image: 'https://via.placeholder.com/250x180?text=1+Weltkrieg',
+                title: '1. Weltkrieg beginnt',
+                description: 'Ausbruch des Ersten Weltkriegs. Europa erlebt beispiellose Destruktion. Die Zivilisation zeigt ihre brutale Seite.',
+                novelConnection: 'Manns Novelle war Prognose: Die \"verführten\" Massen folgen irrationalen Kräften, genau wie Aschenbach der Cholera'
+            },
+            {
+                year: '1918',
+                category: 'Italienischer Faschismus',
+                image: 'https://via.placeholder.com/250x180?text=Biennio+Rosso',
+                title: 'Biennio Rosso - Die roten Jahre',
+                description: 'Nach dem WWI: Aufstände, Arbeiterräte und soziale Unruhen in Italien. Die etablierte Ordnung gerät ins Wanken. Angst vor bolschewistischer Revolution.',
+                novelConnection: 'Genau diese Angst vor Chaos wird von Mussolini instrumentalisiert. Manns Warnung vor Verfall und Manipulation relevant'
+            },
+            {
+                year: '1922',
+                category: 'Italienischer Faschismus / Warnung',
+                image: 'https://via.placeholder.com/250x180?text=Mussolini+Marsch',
+                title: 'Mussolini an die Macht',
+                description: 'Benito Mussolini führt seinen \"Marsch auf Rom\" durch. Mit Versprechen von Ordnung und Größe manipuliert er die verängstigen Massen. Der Faschismus beginnt.',
+                novelConnection: 'PARALLELE ZUR NOVELLE: Aschenbach wird von irrationaler Leidenschaft „verführt", genau wie Italien von Mussolinis Demagogie. Manipulation durch Verheißungen.',
+                quote: '\"In Venice... there was a more insidious poison at work.\" (Sinngemäß: Manipulation vergiftet die Gesellschaft)'
+            },
+            {
+                year: '1925',
+                category: 'Faschismus etabliert sich',
+                image: 'https://via.placeholder.com/250x180?text=Faschistische+Diktatur',
+                title: 'Mussolinis Diktatur stabilisiert sich',
+                description: 'Mussolini etabliert die totale Kontrolle. Propaganda, Gewalt und Gleichschaltung ersetzen Demokratie. Italien wird zum faschistischen Staat.',
+                novelConnection: 'Manns Kritik wird aktuell: Die Gesellschaft verliert ihre Kontrollinstanzen und verfällt der Irrationalität, wie Aschenbach vor dem Tod'
+            },
+            {
+                year: '1930',
+                category: 'Gesellschaftskritik',
+                image: 'https://via.placeholder.com/250x180?text=Totalitarismus',
+                title: 'Faschistische Ideologie reift',
+                description: 'Der italienische Faschismus wird Vorbild für andere Diktaturen. Irrationale Mythen ersetzen Denken. Manipulation durch Ästhetik und Gefühl wird Regierungskunst.',
+                novelConnection: 'KERNWÄSCHE: Wie in der Novelle - das Verführerische (falsche Schönheit, verlockende Versprechungen) zerstört Vernunft und Moral'
+            },
+            {
+                year: '1933',
+                category: 'Warnung wird Wirklichkeit',
+                image: 'https://via.placeholder.com/250x180?text=Nazi+Deutschland',
+                title: 'Hitler kommt an die Macht',
+                description: 'In Deutschland ergreift Hitler die Macht. Manns Heimat wird faschistisch. Seine Warnung vor Manipulation und Verfall wird zur düsteren Realität.',
+                novelConnection: 'Manns Prophetie erfüllt sich: Massenmanipulation durch Ästhetik und irrationale Gefühle besiegt die Aufklärung. Europa verfällt.',
+                quote: '\"Die Republik funktioniert nicht, weil die Menschen vergessen haben, zu denken.\"'
+            },
+            {
+                year: '1936',
+                category: 'Historischer Kontext',
+                image: 'https://via.placeholder.com/250x180?text=Spanischer+Bürgerkrieg',
+                title: 'Spanischer Bürgerkrieg',
+                description: 'Faschisten und Demokraten kämpfen in Spanien. Mussolini und Hitler helfen Francos Faschisten. Faschismus aggressiv expansiv.',
+                novelConnection: 'Das Szenario der Novelle – Verfall der Zivilisation – wird europäische Realität'
+            },
+            {
+                year: '1938',
+                category: 'Thomas Mann / Exil',
+                image: 'https://via.placeholder.com/250x180?text=Thomas+Mann+Exil',
+                title: 'Thomas Mann ins Exil',
+                description: 'Thomas Mann muss Deutschland verlassen. Seine Werke werden von den Nazis verboten. Er zieht sich in die Schweiz zurück.',
+                novelConnection: 'Der Kritiker der faschistischen Verführung muss fliehen. Sein Werk wird zum Beweis seiner Prophetie – er hatte recht'
+            },
+            {
+                year: '1945',
+                category: 'Nachkrieg',
+                image: 'https://via.placeholder.com/250x180?text=Kriegsende',
+                title: 'Kriegsende - Zusammenbruch',
+                description: 'Der Zweite Weltkrieg endet. Faschismus und Nazismus werden besiegt. Aber die Menschheit hat die Warnung gelernt - oder?',
+                novelConnection: 'Aschenbachs Schicksal wird zum Sinnbild für Europas Schicksal: Verführung führt zum Untergang'
+            },
+            {
+                year: '1955',
+                category: 'Thomas Mann',
+                image: 'https://via.placeholder.com/250x180?text=Thomas+Mann+Tod',
+                title: 'Thomas Mann stirbt',
+                description: 'Thomas Mann stirbt am 12. August 1955 in Zürich. Sein Vermächtnis: Die Warnung vor Manipulation, Verfall und der Verführung durch falsche Versprechungen.',
+                novelConnection: 'Seine Werke bleiben Warnung: Zivilisation ist fragil. Irrationale Kräfte können sie zerstören, wenn wir nicht wachsam sind.',
+                quote: '\"Der Künstler ist der Gewissen der Menschheit.\"'
+            }
+        ];
 
-        /**
-         * Funktion zum Umschalten der Anzeige von Beschreibungen
-         * @param {Element} element - Das geklickte Element
-         */
-        function toggleContent(element) {
-            // Entferne die "active" Klasse von allen anderen Elementen
-            const allItems = document.querySelectorAll('.timeline-content');
-            allItems.forEach(item => {
-                if (item !== element) {
-                    item.classList.remove('active');
-                }
+        // ====== Filter und Kategorien ======
+        let currentFilter = null;
+
+        function getCategories() {
+            const categories = new Set();
+            categories.add('Alle');
+            timelineData.forEach(item => {
+                categories.add(item.category);
             });
-
-            // Schalte die "active" Klasse des geklickten Elements um
-            element.classList.toggle('active');
+            return Array.from(categories).sort();
         }
 
-        /**
-         * Funktion zum Schließen aller offenen Beschreibungen
-         * wenn irgendwo außerhalb geklickt wird
-         */
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('.timeline-content')) {
-                document.querySelectorAll('.timeline-content').forEach(item => {
-                    item.classList.remove('active');
-                });
-            }
-        });
+        function initFilters() {
+            const filterContainer = document.getElementById('filterContainer');
+            filterContainer.innerHTML = '';
 
-        // ====== Optionale: Animationen beim Laden ======
-        /**
-         * Füge eine sanfte Animation hinzu, wenn die Seite geladen wird
-         */
-        window.addEventListener('load', function() {
-            const timelineItems = document.querySelectorAll('.timeline-item');
-            timelineItems.forEach((item, index) => {
-                item.style.opacity = '0';
-                item.style.animation = `fadeIn 0.6s ease forwards`;
-                item.style.animationDelay = `${index * 0.1}s`;
+            getCategories().forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                if (category === 'Alle') {
+                    btn.classList.add('active');
+                }
+                btn.textContent = category;
+                btn.onclick = () => filterTimeline(category, btn);
+                filterContainer.appendChild(btn);
             });
+        }
+
+        function filterTimeline(category, btn) {
+            // Button-Status aktualisieren
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            currentFilter = category === 'Alle' ? null : category;
+            updateTimelineDisplay();
+        }
+
+        function updateTimelineDisplay() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+
+            const filteredData = currentFilter 
+                ? timelineData.filter(item => item.category === currentFilter)
+                : timelineData;
+
+            filteredData.forEach((item, index) => {
+                const originalIndex = timelineData.indexOf(item);
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+
+                const card = document.createElement('div');
+                card.className = 'timeline-card';
+                card.onclick = () => openModal(originalIndex);
+
+                const categoryClass = 'category-' + item.category.replace(/ \/ /g, '-').replace(/ /g, '-');
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="card-year">${item.year}</div>
+                        <div class="card-category ${categoryClass}">${item.category}</div>
+                    </div>
+                `;
+
+                timelineItem.appendChild(card);
+                timeline.appendChild(timelineItem);
+            });
+        }
+
+        // ====== Timeline initialisieren ======
+        function initTimeline() {
+            initFilters();
+            updateTimelineDisplay();
+        }
+
+        // ====== Modal öffnen ======
+        function openModal(index) {
+            const item = timelineData[index];
+            const categoryClass = 'category-' + item.category.replace(/ \/ /g, '-').replace(/ /g, '-');
+            
+            document.getElementById('modalCategory').textContent = item.category;
+            document.getElementById('modalCategory').className = 'modal-category ' + categoryClass;
+            document.getElementById('modalImage').src = item.image;
+            document.getElementById('modalYear').textContent = item.year;
+            document.getElementById('modalTitle').textContent = item.title;
+            document.getElementById('modalDescription').textContent = item.description;
+            
+            // Novel Connection anzeigen/verbergen
+            const novelConnectionSection = document.getElementById('novelConnectionSection');
+            if (item.novelConnection) {
+                document.getElementById('modalNovelConnection').textContent = item.novelConnection;
+                novelConnectionSection.style.display = 'block';
+            } else {
+                novelConnectionSection.style.display = 'none';
+            }
+            
+            // Quote anzeigen/verbergen
+            const quoteSection = document.getElementById('quoteSection');
+            if (item.quote) {
+                document.getElementById('modalQuote').textContent = item.quote;
+                quoteSection.style.display = 'block';
+            } else {
+                quoteSection.style.display = 'none';
+            }
+            
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        // ====== Modal schließen ======
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        // ====== Modal bei Klick auf Hintergrund schließen ======
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // ====== Escape-Taste zum Schließen ======
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
         });
 
-        // CSS Animation definieren
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
+        // ====== Initialisierung beim Laden der Seite ======
+        initTimeline();
     </script>
 </body>
 </html>
