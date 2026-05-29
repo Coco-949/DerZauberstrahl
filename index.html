@@ -1,1241 +1,766 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktiver Zeitstrahl - Thomas Mann</title>
-    <style>
-        /* ====== Grundlegende Stile ====== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        /* ====== Kopfbereich ====== */
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-            color: white;
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .subheader {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            color: white;
-            line-height: 1.6;
-            font-size: 0.95em;
-        }
-
-        /* ====== Filter-Buttons ====== */
-        .filter-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        .filter-btn {
-            background: white;
-            color: #333;
-            border: 2px solid white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .filter-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .filter-btn:active {
-            transform: scale(0.98);
-        }
-
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        /* ====== Horizontale Zeitstrahl Struktur ====== */
-        .timeline {
-            position: relative;
-            padding: 60px 0;
-            display: flex;
-            overflow-x: auto;
-            gap: 20px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(102, 126, 234, 0.3) rgba(102, 126, 234, 0.1);
-        }
-
-        /* Scrollbar für Chrome/Edge */
-        .timeline::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .timeline::-webkit-scrollbar-track {
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 10px;
-        }
-
-        .timeline::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.3);
-            border-radius: 10px;
-        }
-
-        .timeline::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.5);
-        }
-
-        /* Horizontale Linie */
-        .timeline::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: white;
-            border-radius: 2px;
-            z-index: 1;
-        }
-
-        /* ====== Zeitleisten-Einträge ====== */
-        .timeline-item {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            flex-shrink: 0;
-            min-width: 150px;
-            height: 120px;
-        }
-
-        /* Ungerade Items: unten */
-        .timeline-item:nth-child(odd) {
-            align-items: flex-end;
-        }
-
-        /* Gerade Items: oben */
-        .timeline-item:nth-child(even) {
-            align-items: flex-start;
-        }
-
-        /* Verbindungspunkt (Kreis) - entfernt */
-        .timeline-item::before {
-            display: none;
-        }
-
-        /* Vertikale Verbindungslinie */
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            background: white;
-            z-index: 2;
-        }
-
-        /* Ungerade Items: Linie nach unten */
-        .timeline-item:nth-child(odd)::after {
-            top: 50%;
-            height: 20px;
-        }
-
-        /* Gerade Items: Linie nach oben */
-        .timeline-item:nth-child(even)::after {
-            bottom: 50%;
-            height: 20px;
-        }
-
-        /* ====== Karten mit Jahr ====== */
-        .timeline-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 120px;
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: -40px 0;
-        }
-
-        .timeline-card:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            transform: scale(1.1);
-        }
-
-        /* Bild in der Karte */
-        .card-image {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        /* Jahr in der Karte */
-        .card-year {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .card-category {
-            font-size: 0.7em;
-            font-weight: 600;
-            margin-top: 8px;
-            padding: 4px 8px;
-            background: #667eea;
-            color: white;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        /* Kategoriefarben */
-        .category-Thomas-Mann { background: #667eea; }
-        .category-Literatur { background: #764ba2; }
-        .category-Faschismus { background: #d63031; }
-        .category-Italienischer-Faschismus { background: #e17055; }
-        .category-Historischer-Kontext { background: #0984e3; }
-        .category-Gesellschaftskritik { background: #6c5ce7; }
-        .category-Warnung-wird-Wirklichkeit { background: #a29bfe; }
-        .category-Nachkrieg { background: #55efc4; }
-
-        /* ====== Modal für Details ====== */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-            position: relative;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #667eea;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .modal-close:hover {
-            color: #764ba2;
-        }
-
-        .modal-image {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            max-height: 300px;
-            object-fit: cover;
-        }
-
-        .modal-year {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .modal-title {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .modal-description {
-            font-size: 0.95em;
-            line-height: 1.8;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .modal-category {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #667eea;
-            color: white;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .modal-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
-        }
-
-        .modal-section-title {
-            font-size: 1.1em;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .modal-quote {
-            font-style: italic;
-            background: #f8f9fa;
-            padding: 15px;
-            border-left: 4px solid #667eea;
-            margin: 15px 0;
-            color: #333;
-            border-radius: 4px;
-        }
-
-        /* ====== Responsive Design ====== */
-        @media (max-width: 1200px) {
-            .container {
-                max-width: 100%;
-                padding: 0 15px;
-            }
-
-            header h1 {
-                font-size: 2.2em;
-            }
-
-            .timeline {
-                padding: 50px 0;
-            }
-
-            .timeline-item {
-                min-width: 130px;
-                height: 110px;
-            }
-
-            .timeline-card {
-                width: 110px;
-                padding: 12px;
-            }
-
-            .card-year {
-                font-size: 1.5em;
-            }
-
-            .card-category {
-                font-size: 0.65em;
-            }
-        }
-
-        /* Tablets - 768px bis 1024px */
-        @media (max-width: 1024px) {
-            body {
-                padding: 30px 15px;
-            }
-
-            header h1 {
-                font-size: 2em;
-                margin-bottom: 8px;
-            }
-
-            header p {
-                font-size: 1em;
-            }
-
-            .subheader {
-                padding: 15px;
-                font-size: 0.9em;
-                line-height: 1.5;
-                margin-bottom: 20px;
-            }
-
-            .filter-container {
-                gap: 8px;
-                margin-bottom: 30px;
-            }
-
-            .filter-btn {
-                padding: 8px 14px;
-                font-size: 0.85em;
-                border-radius: 15px;
-            }
-
-            .timeline {
-                padding: 40px 0;
-                gap: 15px;
-            }
-
-            .timeline-item {
-                min-width: 120px;
-                height: 100px;
-            }
-
-            .timeline-card {
-                width: 100px;
-                padding: 10px;
-                margin: -30px 0;
-            }
-
-            .card-year {
-                font-size: 1.3em;
-            }
-
-            .card-category {
-                font-size: 0.6em;
-                padding: 3px 6px;
-            }
-
-            .modal-content {
-                max-width: 450px;
-                padding: 25px;
-            }
-
-            .modal-image {
-                max-height: 250px;
-            }
-
-            .modal-year {
-                font-size: 1.8em;
-            }
-
-            .modal-title {
-                font-size: 1.3em;
-            }
-
-            .modal-description {
-                font-size: 0.9em;
-            }
-
-            .legend {
-                margin-top: 40px;
-                padding: 20px;
-            }
-
-            .legend h3 {
-                font-size: 1.1em;
-                margin-bottom: 15px;
-            }
-
-            .legend-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-
-            .legend-item {
-                padding: 12px;
-            }
-
-            .legend-item-title {
-                font-size: 0.9em;
-            }
-
-            .legend-item-text {
-                font-size: 0.8em;
-            }
-        }
-
-        /* Kleine Tablets & große Handys - 600px bis 767px */
-        @media (max-width: 767px) {
-            body {
-                padding: 20px 10px;
-            }
-
-            .container {
-                padding: 0;
-            }
-
-            header {
-                margin-bottom: 40px;
-            }
-
-            header h1 {
-                font-size: 1.6em;
-                margin-bottom: 6px;
-            }
-
-            header p {
-                font-size: 0.9em;
-            }
-
-            .subheader {
-                padding: 12px;
-                font-size: 0.85em;
-                line-height: 1.4;
-                margin-bottom: 15px;
-                border-radius: 8px;
-            }
-
-            .filter-container {
-                gap: 6px;
-                margin-bottom: 25px;
-                justify-content: center;
-            }
-
-            .filter-btn {
-                padding: 6px 10px;
-                font-size: 0.75em;
-                min-width: 80px;
-                border-radius: 12px;
-            }
-
-            .timeline {
-                padding: 30px 0;
-                gap: 12px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .timeline::before {
-                height: 3px;
-            }
-
-            .timeline-item {
-                min-width: 100px;
-                height: 80px;
-            }
-
-            .timeline-item:nth-child(odd) {
-                padding-bottom: 30px;
-            }
-
-            .timeline-item:nth-child(even) {
-                padding-top: 30px;
-            }
-
-            .timeline-card {
-                width: 90px;
-                padding: 8px;
-                margin: -20px 0;
-                border-radius: 8px;
-            }
-
-            .card-year {
-                font-size: 1.1em;
-            }
-
-            .card-category {
-                font-size: 0.55em;
-                padding: 2px 5px;
-                margin-top: 5px;
-            }
-
-            .modal {
-                padding: 10px;
-            }
-
-            .modal-content {
-                max-width: 100%;
-                max-height: 90vh;
-                padding: 20px;
-                border-radius: 12px;
-            }
-
-            .modal-close {
-                font-size: 24px;
-                top: 10px;
-                right: 10px;
-            }
-
-            .modal-image {
-                max-height: 200px;
-                margin-bottom: 15px;
-                border-radius: 8px;
-            }
-
-            .modal-year {
-                font-size: 1.5em;
-                margin-bottom: 8px;
-            }
-
-            .modal-title {
-                font-size: 1.1em;
-                margin-bottom: 12px;
-            }
-
-            .modal-category {
-                font-size: 0.8em;
-                padding: 5px 10px;
-                margin-bottom: 12px;
-            }
-
-            .modal-description {
-                font-size: 0.85em;
-                line-height: 1.6;
-                margin-bottom: 15px;
-            }
-
-            .modal-section {
-                margin-top: 15px;
-                padding-top: 15px;
-            }
-
-            .modal-section-title {
-                font-size: 1em;
-            }
-
-            .modal-quote {
-                padding: 12px;
-                font-size: 0.85em;
-                margin: 12px 0;
-            }
-
-            .legend {
-                margin-top: 30px;
-                padding: 15px;
-                border-radius: 8px;
-            }
-
-            .legend h3 {
-                font-size: 1em;
-                margin-bottom: 12px;
-            }
-
-            .legend-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .legend-item {
-                background: rgba(255, 255, 255, 0.08);
-                padding: 10px;
-                border-radius: 6px;
-                border-left-width: 3px;
-            }
-
-            .legend-item-title {
-                font-size: 0.85em;
-                margin-bottom: 6px;
-            }
-
-            .legend-item-text {
-                font-size: 0.75em;
-            }
-        }
-
-        /* Kleine Handys - unter 600px */
-        @media (max-width: 599px) {
-            body {
-                padding: 15px 8px;
-            }
-
-            header h1 {
-                font-size: 1.4em;
-                margin-bottom: 5px;
-            }
-
-            header p {
-                font-size: 0.8em;
-                opacity: 0.9;
-            }
-
-            .subheader {
-                padding: 10px;
-                font-size: 0.8em;
-                line-height: 1.4;
-                margin-bottom: 12px;
-            }
-
-            .subheader strong {
-                display: block;
-                margin-bottom: 6px;
-            }
-
-            .filter-container {
-                gap: 5px;
-                margin-bottom: 20px;
-            }
-
-            .filter-btn {
-                padding: 5px 8px;
-                font-size: 0.7em;
-                min-width: 70px;
-            }
-
-            .timeline {
-                padding: 25px 0;
-                gap: 10px;
-            }
-
-            .timeline-item {
-                min-width: 85px;
-                height: 70px;
-            }
-
-            .timeline-item::after {
-                width: 1.5px;
-            }
-
-            .timeline-card {
-                width: 80px;
-                padding: 6px;
-                margin: -15px 0;
-            }
-
-            .card-year {
-                font-size: 0.95em;
-            }
-
-            .card-category {
-                font-size: 0.5em;
-                padding: 2px 4px;
-                margin-top: 3px;
-            }
-
-            .modal-content {
-                padding: 15px;
-                border-radius: 10px;
-            }
-
-            .modal-image {
-                max-height: 180px;
-                margin-bottom: 12px;
-            }
-
-            .modal-year {
-                font-size: 1.3em;
-                margin-bottom: 6px;
-            }
-
-            .modal-title {
-                font-size: 1em;
-                margin-bottom: 10px;
-            }
-
-            .modal-description {
-                font-size: 0.8em;
-                line-height: 1.5;
-            }
-
-            .modal-quote {
-                padding: 10px;
-                font-size: 0.8em;
-                margin: 10px 0;
-            }
-
-            .legend {
-                margin-top: 25px;
-                padding: 12px;
-            }
-
-            .legend h3 {
-                font-size: 0.95em;
-                margin-bottom: 10px;
-            }
-
-            .legend-item {
-                padding: 8px;
-            }
-
-            .legend-item-title {
-                font-size: 0.8em;
-                margin-bottom: 5px;
-            }
-
-            .legend-item-text {
-                font-size: 0.7em;
-            }
-        }
-
-        /* Extra kleine Handys - unter 360px */
-        @media (max-width: 359px) {
-            header h1 {
-                font-size: 1.2em;
-            }
-
-            header p {
-                font-size: 0.75em;
-            }
-
-            .filter-btn {
-                padding: 4px 6px;
-                font-size: 0.65em;
-                min-width: 60px;
-            }
-
-            .timeline-card {
-                width: 70px;
-                padding: 5px;
-            }
-
-            .card-year {
-                font-size: 0.9em;
-            }
-
-            .card-category {
-                font-size: 0.45em;
-            }
-        }
-
-        /* ====== Footer/Legende ====== */
-        .legend {
-            margin-top: 60px;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            text-align: center;
-        }
-
-        .legend h3 {
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-
-        .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            text-align: left;
-        }
-
-        .legend-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid white;
-            transition: all 0.3s ease;
-        }
-
-        .legend-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .legend-item-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .legend-item-text {
-            font-size: 0.9em;
-            opacity: 0.9;
-            line-height: 1.4;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mario und der Zauberer — Interaktiver Zeitstrahl</title>
+  <meta name="description" content="Interaktiver Zeitstrahl zu Thomas Manns Novelle Mario und der Zauberer: Entstehung, Faschismus, Italien unter Mussolini und politische Entwicklungen." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #F5F0E8;
+      --bg2:       #EDE7D9;
+      --bg3:       #E2DBCC;
+      --ink:       #1C1713;
+      --ink2:      #4A3F35;
+      --ink3:      #7A6E62;
+      --ink4:      #A89E93;
+      --rule:      rgba(90,70,50,0.15);
+      --rule2:     rgba(90,70,50,0.08);
+
+      --c-mann:        #4A2D7F;
+      --c-mann-light:  #EDE8F7;
+      --c-mann-mid:    #7B5BBF;
+
+      --c-ital:        #0F6B47;
+      --c-ital-light:  #E0F0E9;
+      --c-ital-mid:    #2A9D6F;
+
+      --c-fasch:       #8B2B0E;
+      --c-fasch-light: #F5E6E0;
+      --c-fasch-mid:   #C25030;
+
+      --c-nov:         #1A4A7A;
+      --c-nov-light:   #E4EEF8;
+      --c-nov-mid:     #3070B0;
+
+      --c-pol:         #7A4A00;
+      --c-pol-light:   #F5EDD8;
+      --c-pol-mid:     #B87520;
+
+      --serif: 'Playfair Display', Georgia, serif;
+      --body:  'Source Serif 4', Georgia, serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── TEXTURE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity: 0.6;
+    }
+
+    /* ─── HEADER ─── */
+    .site-header {
+      position: relative; z-index: 10;
+      border-bottom: 1px solid var(--rule);
+      background: var(--bg);
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+    }
+    .header-label {
+      font-family: var(--body);
+      font-size: 11px; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--ink3);
+      margin-bottom: 0.75rem;
+    }
+    .header-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 700; line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+    .header-title em {
+      font-style: italic; color: var(--c-fasch);
+    }
+    .header-subtitle {
+      font-family: var(--serif);
+      font-size: clamp(0.95rem, 2vw, 1.2rem);
+      font-weight: 400; font-style: italic;
+      color: var(--ink3); margin-bottom: 1.5rem;
+    }
+    .header-rule {
+      width: 60px; height: 1px;
+      background: var(--rule);
+      margin: 0 auto 1.5rem;
+    }
+    .header-intro {
+      max-width: 640px; margin: 0 auto;
+      font-size: 0.95rem; color: var(--ink2);
+      line-height: 1.75;
+    }
+
+    /* ─── MAIN LAYOUT ─── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ─── FILTERS ─── */
+    .filter-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--rule2);
+      padding: 1rem 0;
+      display: flex; flex-wrap: wrap;
+      gap: 8px; justify-content: center;
+      margin: 0 -1.5rem 0;
+      padding-left: 1.5rem; padding-right: 1.5rem;
+    }
+    .filter-btn {
+      font-family: var(--body);
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 5px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--rule);
+      background: transparent;
+      color: var(--ink3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .filter-btn:hover {
+      background: var(--bg2);
+      color: var(--ink2);
+      border-color: var(--rule);
+    }
+    .filter-btn.active-all  { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .filter-btn.active-mann { background: var(--c-mann); color: #fff; border-color: var(--c-mann); }
+    .filter-btn.active-ital { background: var(--c-ital); color: #fff; border-color: var(--c-ital); }
+    .filter-btn.active-fasch{ background: var(--c-fasch); color: #fff; border-color: var(--c-fasch); }
+    .filter-btn.active-nov  { background: var(--c-nov); color: #fff; border-color: var(--c-nov); }
+    .filter-btn.active-pol  { background: var(--c-pol); color: #fff; border-color: var(--c-pol); }
+
+    .filter-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; margin-right: 6px; vertical-align: middle;
+    }
+
+    /* ─── LEGEND ─── */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      justify-content: center;
+      padding: 1.25rem 0 0;
+      font-size: 12px; color: var(--ink3);
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-swatch {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ─── TIMELINE SHELL ─── */
+    .timeline {
+      position: relative;
+      margin-top: 2.5rem;
+    }
+    .timeline-spine {
+      position: absolute;
+      left: 50%; transform: translateX(-0.5px);
+      top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--rule) 4%, var(--rule) 96%, transparent);
+    }
+
+    /* ─── YEAR MARKER ─── */
+    .year-marker {
+      position: relative; z-index: 5;
+      display: flex; justify-content: center;
+      margin: 2.5rem 0 1rem;
+    }
+    .year-bubble {
+      font-family: var(--serif);
+      font-size: 13px; font-weight: 700;
+      color: var(--ink2);
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      padding: 4px 18px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── EVENT ROW ─── */
+    .event-row {
+      display: grid;
+      grid-template-columns: 1fr 56px 1fr;
+      gap: 0;
+      margin-bottom: 1.25rem;
+      position: relative;
+      transition: opacity 0.3s ease;
+    }
+    .event-row.hidden {
+      display: none;
+    }
+
+    .event-slot { display: flex; align-items: flex-start; }
+    .event-slot.left  { justify-content: flex-end; padding-right: 24px; }
+    .event-slot.right { justify-content: flex-start; padding-left: 24px; }
+    .event-slot.empty { }
+
+    /* ─── EVENT CARD ─── */
+    .event-card {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 14px 18px;
+      cursor: pointer;
+      max-width: 380px;
+      width: 100%;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .event-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+    }
+    .event-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(28,23,19,0.1);
+    }
+
+    .card-mann::before  { background: var(--c-mann); }
+    .card-ital::before  { background: var(--c-ital); }
+    .card-fasch::before { background: var(--c-fasch); }
+    .card-nov::before   { background: var(--c-nov); }
+    .card-pol::before   { background: var(--c-pol); }
+
+    .card-mann:hover  { border-color: var(--c-mann-mid); }
+    .card-ital:hover  { border-color: var(--c-ital-mid); }
+    .card-fasch:hover { border-color: var(--c-fasch-mid); }
+    .card-nov:hover   { border-color: var(--c-nov-mid); }
+    .card-pol:hover   { border-color: var(--c-pol-mid); }
+
+    .card-cat-tag {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 6px;
+      display: block;
+    }
+    .tag-mann  { color: var(--c-mann); }
+    .tag-ital  { color: var(--c-ital); }
+    .tag-fasch { color: var(--c-fasch); }
+    .tag-nov   { color: var(--c-nov); }
+    .tag-pol   { color: var(--c-pol); }
+
+    .card-title {
+      font-family: var(--serif);
+      font-size: 1rem; font-weight: 600;
+      line-height: 1.35;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .card-date {
+      font-size: 12px; color: var(--ink3);
+      font-style: italic;
+    }
+    .card-arrow {
+      position: absolute; bottom: 12px; right: 14px;
+      font-size: 14px; color: var(--ink4);
+      transition: transform 0.15s, color 0.15s;
+    }
+    .event-card:hover .card-arrow { transform: translateX(3px); color: var(--ink2); }
+
+    /* ─── SPINE DOT ─── */
+    .spine-col {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding-top: 16px; position: relative; z-index: 5;
+    }
+    .spine-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--bg);
+      cursor: pointer;
+      transition: transform 0.15s;
+      flex-shrink: 0;
+    }
+    .spine-dot:hover { transform: scale(1.4); }
+    .dot-mann  { background: var(--c-mann); }
+    .dot-ital  { background: var(--c-ital); }
+    .dot-fasch { background: var(--c-fasch); }
+    .dot-nov   { background: var(--c-nov); }
+    .dot-pol   { background: var(--c-pol); }
+
+    /* ─── DETAIL PANEL ─── */
+    .detail-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(28,23,19,0.45);
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+      backdrop-filter: blur(2px);
+    }
+    .detail-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+    .detail-panel {
+      background: var(--bg);
+      width: 100%; max-width: 720px;
+      max-height: 88vh;
+      border-radius: 16px 16px 0 0;
+      border-top: 1px solid var(--rule);
+      overflow-y: auto;
+      transform: translateY(40px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      padding: 2rem 2.5rem 3rem;
+      position: relative;
+    }
+    .detail-overlay.open .detail-panel {
+      transform: translateY(0);
+    }
+
+    .detail-handle {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: var(--ink4);
+      margin: 0 auto 1.5rem;
+    }
+    .detail-close {
+      position: absolute; top: 1.25rem; right: 1.5rem;
+      background: var(--bg2); border: none;
+      width: 32px; height: 32px; border-radius: 50%;
+      cursor: pointer; font-size: 16px;
+      color: var(--ink2); display: flex;
+      align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .detail-close:hover { background: var(--bg3); }
+
+    .detail-badge {
+      display: inline-block; font-size: 10px; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+    .badge-mann  { background: var(--c-mann-light); color: var(--c-mann); }
+    .badge-ital  { background: var(--c-ital-light);  color: var(--c-ital); }
+    .badge-fasch { background: var(--c-fasch-light); color: var(--c-fasch); }
+    .badge-nov   { background: var(--c-nov-light);   color: var(--c-nov); }
+    .badge-pol   { background: var(--c-pol-light);   color: var(--c-pol); }
+
+    .detail-title {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700; line-height: 1.25;
+      color: var(--ink); margin-bottom: 0.35rem;
+    }
+    .detail-date {
+      font-family: var(--serif);
+      font-size: 1rem; font-style: italic;
+      color: var(--ink3); margin-bottom: 1.5rem;
+    }
+    .detail-rule {
+      height: 1px; background: var(--rule);
+      margin-bottom: 1.5rem;
+    }
+    .detail-body {
+      font-size: 0.975rem; color: var(--ink2);
+      line-height: 1.85;
+    }
+    .detail-body p { margin-bottom: 1rem; }
+    .detail-body blockquote {
+      border-left: 3px solid var(--rule);
+      padding: 0.5rem 0 0.5rem 1.25rem;
+      margin: 1.25rem 0;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--ink2);
+      line-height: 1.7;
+    }
+    .detail-body em { font-style: italic; }
+    .detail-body strong { font-weight: 600; color: var(--ink); }
+
+    /* ─── FOOTER ─── */
+    .site-footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--rule2);
+      font-size: 12px;
+      color: var(--ink4);
+      font-style: italic;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 680px) {
+      .timeline-spine { left: 20px; }
+      .event-row { grid-template-columns: 40px 1fr; grid-template-rows: auto; }
+      .event-slot.left  {
+        grid-column: 2; grid-row: 1;
+        justify-content: flex-start; padding-left: 16px; padding-right: 0;
+      }
+      .event-slot.right {
+        grid-column: 2; grid-row: 1;
+        padding-left: 16px;
+      }
+      .event-slot.empty { display: none; }
+      .spine-col { grid-column: 1; grid-row: 1; padding-top: 16px; }
+      .detail-panel { padding: 1.5rem 1.25rem 2.5rem; }
+      .year-marker { justify-content: flex-start; padding-left: 6px; }
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .event-row { animation: fadeUp 0.4s ease both; }
+    .event-row:nth-child(1)  { animation-delay: 0.02s; }
+    .event-row:nth-child(2)  { animation-delay: 0.05s; }
+    .event-row:nth-child(3)  { animation-delay: 0.08s; }
+    .event-row:nth-child(4)  { animation-delay: 0.11s; }
+    .event-row:nth-child(5)  { animation-delay: 0.14s; }
+    .event-row:nth-child(6)  { animation-delay: 0.17s; }
+    .event-row:nth-child(7)  { animation-delay: 0.20s; }
+    .event-row:nth-child(8)  { animation-delay: 0.23s; }
+    .event-row:nth-child(9)  { animation-delay: 0.26s; }
+    .event-row:nth-child(10) { animation-delay: 0.29s; }
+    .event-row:nth-child(11) { animation-delay: 0.32s; }
+    .event-row:nth-child(12) { animation-delay: 0.35s; }
+    .event-row:nth-child(13) { animation-delay: 0.38s; }
+    .event-row:nth-child(14) { animation-delay: 0.41s; }
+    .event-row:nth-child(15) { animation-delay: 0.44s; }
+    .event-row:nth-child(16) { animation-delay: 0.47s; }
+    .event-row:nth-child(17) { animation-delay: 0.50s; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Kopfbereich mit Titel -->
-        <header>
-            <h1>Zeitstrahl: Thomas Mann</h1>
-            <p>Die Novelle "Mario und der Zauberer" im Spiegel von Geschichte und Faschismus</p>
-        </header>
 
-        <!-- Einführungstext -->
-        <div class="subheader">
-            <strong>🎯 Zentrale Leitfrage:</strong> Warum ist der historische Hintergrund wichtig für die Novelle?<br><br>
-            Diese Zeitleiste verbindet die literarische Welt von Thomas Mann mit der politischen Realität seiner Zeit. 
-            Sie zeigt, wie Manns Novelle "Mario und der Zauberer" (1930) als <strong>direktes Allegorie der faschistischen Manipulation</strong> verstanden werden kann. 
-            Der Zauberer Cipolla verkörpert den Diktator - seine Hypnose-Tricks sind Metapher für die Macht totalitärer Regime.
-        </div>
-
-        <!-- Filter -->
-        <div class="filter-container" id="filterContainer">
-            <!-- Wird durch JavaScript generiert -->
-        </div>
-
-        <!-- Hauptzeitstrahl -->
-        <div class="timeline" id="timeline">
-            <!-- Die Einträge werden durch JavaScript generiert -->
-        </div>
-
-        <!-- Legende und Erklärungen -->
-        <div class="legend">
-            <h3>ℹ️ Leitfaden zur Zeitleiste</h3>
-            <div class="legend-grid">
-                <div class="legend-item">
-                    <div class="legend-item-title">📖 Thomas Mann</div>
-                    <div class="legend-item-text">Lebensstationen und literarische Werke des Autors</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-item-title">✍️ Literatur / Warnung</div>
-                    <div class="legend-item-text">Manns Werke und ihre Bedeutung als Warnung</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-item-title">🇮🇹 Italienischer Faschismus</div>
-                    <div class="legend-item-text">Historische Ereignisse in Italien unter Mussolini</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-item-title">⚡ Historischer Kontext</div>
-                    <div class="legend-item-text">Weitere historische Ereignisse, die relevant sind</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-item-title">💭 Gesellschaftskritik</div>
-                    <div class="legend-item-text">Manns Kritik an faschistischen Tendenzen</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-item-title">🚨 Warnung wird Wirklichkeit</div>
-                    <div class="legend-item-text">Erfüllung von Manns Prophezeiungen</div>
-                </div>
-            </div>
-        </div>
+  <!-- HEADER -->
+  <header class="site-header">
+    <p class="header-label">Thomas Mann · 1930</p>
+    <h1 class="header-title"><em>Mario und der Zauberer</em></h1>
+    <p class="header-subtitle">Ein interaktiver Zeitstrahl zu Entstehung, Kontext und Warnung</p>
+    <div class="header-rule"></div>
+    <p class="header-intro">
+      Thomas Manns Novelle von 1930 ist weit mehr als ein Reiseerlebnis —
+      sie ist eine politische Parabel über Verführung, Massenhypnose und die
+      Gefährdung des freien Willens im faschistischen Europa. Dieser Zeitstrahl
+      verbindet fünf Themenbereiche, die zeigen, wie eng Biographie, Politik
+      und literarisches Werk miteinander verwoben sind.
+    </p>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--c-mann)"></span>Thomas Mann</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--c-ital)"></span>Italien &amp; Mussolini</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--c-fasch)"></span>Faschismus</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--c-nov)"></span>Entstehung der Novelle</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--c-pol)"></span>Politische Entwicklungen</span>
     </div>
+  </header>
 
-    <!-- Modal für Details -->
-    <div class="modal" id="detailModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-                <div class="modal-category" id="modalCategory"></div>
-                <img class="modal-image" id="modalImage" src="" alt="Event Bild">
-                <div class="modal-year" id="modalYear"></div>
-                <div class="modal-title" id="modalTitle"></div>
-                <div class="modal-description" id="modalDescription"></div>
-                
-                <div class="modal-section" id="novelConnectionSection" style="display: none;">
-                    <div class="modal-section-title">Verbindung zur Novelle</div>
-                    <div id="modalNovelConnection"></div>
-                </div>
+  <!-- MAIN -->
+  <main>
+    <div class="page-wrap">
 
-                <div class="modal-section" id="quoteSection" style="display: none;">
-                    <div class="modal-section-title">Zitat</div>
-                    <div class="modal-quote" id="modalQuote"></div>
-                </div>
-            </div>
-        </div>
+      <!-- FILTER BAR -->
+      <nav class="filter-bar" aria-label="Themenfilter">
+        <button class="filter-btn active-all" data-cat="all">Alle Themen</button>
+        <button class="filter-btn" data-cat="mann">
+          <span class="filter-dot" style="background:var(--c-mann)"></span>Thomas Mann
+        </button>
+        <button class="filter-btn" data-cat="ital">
+          <span class="filter-dot" style="background:var(--c-ital)"></span>Italien &amp; Mussolini
+        </button>
+        <button class="filter-btn" data-cat="fasch">
+          <span class="filter-dot" style="background:var(--c-fasch)"></span>Faschismus
+        </button>
+        <button class="filter-btn" data-cat="nov">
+          <span class="filter-dot" style="background:var(--c-nov)"></span>Entstehung der Novelle
+        </button>
+        <button class="filter-btn" data-cat="pol">
+          <span class="filter-dot" style="background:var(--c-pol)"></span>Politische Entwicklungen
+        </button>
+      </nav>
+
+      <!-- TIMELINE -->
+      <section class="timeline" aria-label="Zeitstrahl">
+        <div class="timeline-spine" aria-hidden="true"></div>
+        <div id="timeline-body"></div>
+      </section>
+
     </div>
+  </main>
 
-    <script>
-        // ====== Zeitstrahl-Daten ======
-        const timelineData = [
-            {
-                year: '1875',
-                category: 'Thomas Mann',
-                image: 'https://via.placeholder.com/250x180?text=Thomas+Mann+Geburt',
-                title: 'Geburt Thomas Manns',
-                description: 'Thomas Mann wird am 6. Juni 1875 in Lübeck geboren. Aufwachsen in einer wohlhabenden Kaufmannsfamilie prägt sein Werk.',
-                novelConnection: 'Manns Elternhaus formt seinen kritischen Blick auf Gesellschaft und Dekadenz'
-            },
-            {
-                year: '1901',
-                category: 'Literatur',
-                image: 'https://via.placeholder.com/250x180?text=Buddenbrooks',
-                title: 'Buddenbrooks veröffentlicht',
-                description: 'Thomas Manns Meisterwerk über den Niedergang einer Kaufmannsfamilie wird veröffentlicht. Der Roman behandelt Themen von Verfall und Dekadenz.',
-                novelConnection: 'Präludium zu "Der Tod in Venedig" – beide Werke beschäftigen sich mit Verfall und innerer Zerstörung'
-            },
-            {
-                year: '1910',
-                category: 'Italienischer Faschismus',
-                image: 'https://via.placeholder.com/250x180?text=Prä-Faschismus+Italien',
-                title: 'Italien unter Spannungen',
-                description: 'Italien durchlebt politische und soziale Umwälzungen. Anarchisten und Sozialisten fordern radikale Veränderungen.',
-                novelConnection: 'Venedig ist Symbol einer untergehenden Kulturwelt – das Chaos außen spiegelt sich in der Stadt'
-            },
-            {
-                year: '1912',
-                category: 'Literatur',
-                image: 'https://via.placeholder.com/250x180?text=Der+Tod+in+Venedig',
-                title: 'Der Tod in Venedig - Vorläufer',
-                description: 'Thomas Manns erste Novelle über Verfall und Dekadenz. Ein frühes Zeichen seines Interesses an Manipulation und dem Unbewussten.',
-                novelConnection: 'Vorform des Themas: Wie kann man seine Kontrolle verlieren? Wie wirken innere Triebe?'
-            },
-            {
-                year: '1920',
-                category: 'Historischer Kontext',
-                image: 'https://via.placeholder.com/250x180?text=Weimar+Republik',
-                title: 'Weimarer Republik gegründet',
-                description: 'Nach dem 1. Weltkrieg entstehen Instabilität und Verunsicherung. Menschen suchen nach starken Führungspersonen.',
-                novelConnection: 'Das psychologische Klima für Manipulation ist geschaffen - Menschen sind bereit, sich verführen zu lassen'
-            },
-            {
-                year: '1922',
-                category: 'Italienischer Faschismus',
-                image: 'https://via.placeholder.com/250x180?text=Mussolini+Marsch',
-                title: 'Mussolini an die Macht',
-                description: 'Benito Mussolini führt seinen "Marsch auf Rom" durch. Mit Versprechen und Manipulation gewinnt er die Massen.',
-                novelConnection: 'Der Diktator ist wie ein Zauberer: Er hypnotisiert sein Publikum, sie folgen ihm willenlos'
-            },
-            {
-                year: '1925',
-                category: 'Italienischer Faschismus',
-                image: 'https://via.placeholder.com/250x180?text=Faschistische+Diktatur',
-                title: 'Totalitäre Kontrolle etabliert',
-                description: 'Italien wird totaler faschistischer Staat. Propaganda, Gewalt und Manipulation ersetzen Demokratie. Die Bevölkerung wird gleichgeschaltet.',
-                novelConnection: 'Das System funktioniert wie Cipolla: Die Menge gibt ihre Willensfreiheit auf und folgt blind'
-            },
-            {
-                year: '1929',
-                category: 'Gesellschaftskritik',
-                image: 'https://via.placeholder.com/250x180?text=Wirtschaftskrise',
-                title: 'Weltwirtschaftskrise',
-                description: 'Die Börse crasht. Arbeitslosigkeit und Verzweiflung greifen um sich. Menschen sind verunsichert und suchen Sicherheit.',
-                novelConnection: 'PSYCHOLOGISCHES KLIMA: Menschen sind manipulierbar, wenn sie verängstigt und verzweifelt sind'
-            },
-            {
-                year: '1930',
-                category: 'Literatur / Warnung',
-                image: 'https://via.placeholder.com/250x180?text=Mario+Zauberer',
-                title: 'Mario und der Zauberer - Veröffentlichung',
-                description: 'Thomas Mann veröffentlicht "Mario und der Zauberer". Die Novelle erzählt vom Zauberer Cipolla, der mit Hypnose sein Publikum manipuliert. Eine unmittelbare Warnung vor faschistischer Demagogie.',
-                novelConnection: 'ZENTRAL: Die Novelle ist ALLEGORIE des Faschismus. Cipolla = der Diktator. Seine Hypnose = propagandistische Manipulation. Das Publikum = das Volk, das seine Willensfreiheit aufgibt.',
-                quote: '\"Seine Macht lag in der Augen-Art... das Volk war wie hypnotisiert.\"'
-            },
-            {
-                year: '1933',
-                category: 'Warnung wird Wirklichkeit',
-                image: 'https://via.placeholder.com/250x180?text=Hitler+Macht',
-                title: 'Hitler kommt an die Macht',
-                description: 'Adolf Hitler ergreift die Kontrolle in Deutschland. Mit charismatischen Reden und Propaganda manipuliert er die Massen - wie ein Zauberer.',
-                novelConnection: 'MANNS PROPHEZEIUNG ERFÜLLT SICH: Hitler ist wie Cipolla! Er hypnotisiert Deutschland mit Reden, Symbolen und Propaganda.',
-                quote: '\"Der Wille der Masse wird vom Willen des Einen gebrochen.\"'
-            },
-            {
-                year: '1935',
-                category: 'Faschismus etabliert sich',
-                image: 'https://via.placeholder.com/250x180?text=Nazi+Gleichschaltung',
-                title: 'Gleichschaltung & Propaganda',
-                description: 'Nazi-Deutschland nutzt Film, Radio und Symbole für Massenbeeinflussung. Die Bevölkerung wird systematisch manipuliert und gleichgeschaltet.',
-                novelConnection: 'CIPOLLA-EFFEKT: Das ganze Reich funktioniert wie das Varieté in Manns Novelle. Die Menge hat ihre Willensfreiheit aufgegeben'
-            },
-            {
-                year: '1936',
-                category: 'Historischer Kontext',
-                image: 'https://via.placeholder.com/250x180?text=Olympiade+Berlin',
-                title: 'Olympische Spiele - Propaganda-Spektakel',
-                description: 'Die Nazi-Regime nutzt die Berliner Olympiaden als Bühne für ihre Ideologie. Manipulation durch Spektakel und Ästhetik.',
-                novelConnection: 'Das Varieté-Szenario aus der Novelle: Cipolla nutzt Ästhetik und Spektakel zur Manipulation - genau wie die Nazis'
-            },
-            {
-                year: '1938',
-                category: 'Thomas Mann / Exil',
-                image: 'https://via.placeholder.com/250x180?text=Mann+Emigration',
-                title: 'Thomas Mann muss emigrieren',
-                description: 'Thomas Mann flieht Deutschland. Seine Werke werden von den Nazis verboten. Seine Warnung war zu früh erkannt worden.',
-                novelConnection: 'Der Mann, der die Gefahr kommen sah, muss fliehen. Seine Novelle wird zur Beweis seiner Prophetie'
-            },
-            {
-                year: '1939',
-                category: 'Historischer Kontext',
-                image: 'https://via.placeholder.com/250x180?text=Weltkrieg+Beginn',
-                title: 'Zweiter Weltkrieg beginnt',
-                description: 'Der Faschismus führt zu Krieg. Die Manipulation ist zur Zerstörung geworden. Europa steht in Flammen.',
-                novelConnection: 'Das Finale von Cipolla führt zu Gewalt. Das Finale des Faschismus führt zu weltweiter Zerstörung'
-            },
-            {
-                year: '1945',
-                category: 'Nachkrieg',
-                image: 'https://via.placeholder.com/250x180?text=Kriegsende',
-                title: 'Kriegsende - Befreiung',
-                description: 'Der Zweite Weltkrieg endet. Der fascistische Bann ist gebrochen. Aber die Lehren aus Manns Novelle bleiben wichtig.',
-                novelConnection: 'Wie Mario muss sich die Gesellschaft vom Bann des Zauberers befreien. Wachsamkeit ist notwendig'
-            },
-            {
-                year: '1955',
-                category: 'Thomas Mann',
-                image: 'https://via.placeholder.com/250x180?text=Mann+Tod',
-                title: 'Thomas Mann stirbt',
-                description: 'Thomas Mann stirbt am 12. August 1955 in Zürich. Sein Vermächtnis: Die Warnung vor Manipulation, vor den Gefahren des Faschismus.',
-                novelConnection: 'Seine Werke - besonders "Mario und der Zauberer" - bleiben zeitlos relevant. Eine Warnung für jede Generation.',
-                quote: '\"Der Künstler ist das Gewissen der Menschheit.\"'
-            }
-        ];
+  <!-- DETAIL OVERLAY -->
+  <div id="detail-overlay" class="detail-overlay" role="dialog" aria-modal="true" aria-labelledby="detail-title-el">
+    <div class="detail-panel" id="detail-panel">
+      <div class="detail-handle" aria-hidden="true"></div>
+      <button class="detail-close" id="detail-close-btn" aria-label="Schließen">✕</button>
+      <span id="detail-badge-el" class="detail-badge"></span>
+      <h2 class="detail-title" id="detail-title-el"></h2>
+      <p class="detail-date"  id="detail-date-el"></p>
+      <div class="detail-rule" aria-hidden="true"></div>
+      <div class="detail-body" id="detail-body-el"></div>
+    </div>
+  </div>
 
-        // ====== Filter und Kategorien ======
-        let currentFilter = null;
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>Thomas Mann: <em>Mario und der Zauberer</em> (1930) · Interaktiver Zeitstrahl</p>
+  </footer>
 
-        function getCategories() {
-            const categories = new Set();
-            categories.add('Alle');
-            timelineData.forEach(item => {
-                categories.add(item.category);
-            });
-            return Array.from(categories).sort();
-        }
+  <script>
+  const CAT_LABELS = {
+    mann:  'Thomas Mann',
+    ital:  'Italien &amp; Mussolini',
+    fasch: 'Faschismus',
+    nov:   'Entstehung der Novelle',
+    pol:   'Politische Entwicklungen'
+  };
 
-        function initFilters() {
-            const filterContainer = document.getElementById('filterContainer');
-            filterContainer.innerHTML = '';
+  const EVENTS = [
+    {
+      year: 1875, date: '6. Juni 1875', cat: 'mann',
+      title: 'Geburt Thomas Manns in Lübeck',
+      body: `<p>Thomas Mann wird in Lübeck als zweiter Sohn des Senators Thomas Johann Heinrich Mann und seiner Frau Julia da Silva-Bruhns geboren. Das bürgerliche Elternhaus und die hanseatische Kaufmannstradition prägen sein späteres Werk: Der Spannungsbogen zwischen Bürgertum und Künstlertum wird zum zentralen Lebensthema.</p>
+<p>Diese privilegierte Herkunft ermöglicht ihm eine umfassende Bildung und den Zugang zur europäischen Geistesgeschichte — die Grundlage für sein späteres politisches Urteil und die Fähigkeit, gesellschaftliche Zerfallsprozesse literarisch zu fassen.</p>`
+    },
+    {
+      year: 1901, date: '1901', cat: 'mann',
+      title: '»Buddenbrooks« erscheinen',
+      body: `<p>Mit dem Roman <em>Buddenbrooks. Verfall einer Familie</em> gelingt Thomas Mann sein literarischer Durchbruch. Das Werk schildert den Niedergang einer Lübecker Kaufmannsfamilie über mehrere Generationen — und etabliert den <strong>Verfall als literarisches Prinzip</strong>.</p>
+<p>Schon hier erprobt Mann, was er in <em>Mario und der Zauberer</em> konsequent auf die politische Realität überträgt: die Fähigkeit, gesellschaftliche Erosion, Schwäche und Kapitulation in Prosa zu zeigen. Der Beobachter, der zu lange schaut und zu spät handelt, ist eine der tragenden Figuren seines gesamten Werks.</p>`
+    },
+    {
+      year: 1918, date: '1915–1918', cat: 'mann',
+      title: '»Betrachtungen eines Unpolitischen«',
+      body: `<p>Während des Ersten Weltkrieges verfasst Thomas Mann die <em>Betrachtungen eines Unpolitischen</em> (erschienen 1918). Er verteidigt darin einen deutschen Sonderweg und unterscheidet scharf zwischen »Kultur« (deutsch, tief, innerlich) und »Zivilisation« (westlich, oberflächlich, demokratisch).</p>
+<p>Dieser Text ist für das Verständnis von <em>Mario und der Zauberer</em> entscheidend: Mann schreibt die Novelle als <strong>gewandelter Humanist und Demokrat</strong>. Die Selbstkritik an seiner früheren nationalistischen Haltung fließt direkt in die Gestaltung ein — der Erzähler, der zu lange bleibt und schaut, ist auch ein Selbstporträt des politisch zögerlichen Intellektuellen.</p>`
+    },
+    {
+      year: 1919, date: '1919', cat: 'pol',
+      title: 'Gründung der Weimarer Republik',
+      body: `<p>Nach dem Ersten Weltkrieg entsteht in Deutschland die Weimarer Republik — die erste parlamentarische Demokratie des Landes. Von Anfang an kämpft sie mit politischer Instabilität, Hyperinflation, Massenarbeitslosigkeit und dem nationalen Trauma der Kriegsniederlage.</p>
+<p>Das Versagen demokratischer Institutionen gegenüber autoritären Verführern ist ein Kernthema der Novelle. Der Erzähler beobachtet Cipollas Übergriffe, protestiert kaum und bleibt — ein Bild für die Passivität der deutschen Mitte:</p>
+<blockquote>»Wir blieben [...]. Es war schon zu spät.«</blockquote>
+<p>Thomas Mann richtet diese Warnung direkt an eine Gesellschaft, die sich durch Tatenlosigkeit selbst preisgibt.</p>`
+    },
+    {
+      year: 1921, date: '1921', cat: 'fasch',
+      title: 'Mussolini gründet die faschistische Partei',
+      body: `<p>Benito Mussolini gründet die <em>Partito Nazionale Fascista</em>. Das faschistische Programm verbindet extremen Nationalismus, den Kult der Gewalt, Führerprinzip und die rücksichtslose Unterdrückung aller Opposition.</p>
+<p>Der Zauberer Cipolla in Manns Novelle verkörpert exakt diese Merkmale — er dominiert durch psychische Gewalt, demütigt das Publikum systematisch und beweist die Macht der Suggestion über den freien Willen. Mann beschreibt ihn als:</p>
+<blockquote>»einen Diktator der Unterhaltung, der sein Publikum zwang, sich selbst zu erniedrigen — und dem das Publikum applaudierte.«</blockquote>`
+    },
+    {
+      year: 1922, date: '28. Oktober 1922', cat: 'ital',
+      title: 'Marsch auf Rom — Mussolini an der Macht',
+      body: `<p>Mussolinis Schwarzhemden marschieren auf Rom. König Viktor Emanuel III. ernennt Mussolini ohne Gegenwehr zum Ministerpräsidenten. Eine parlamentarische Demokratie kapituliert vor politischer Einschüchterung — ohne Schuss, ohne Widerstand.</p>
+<p>Dieser Moment ist das historische Vorbild für die Atmosphäre der Novelle: das Publikum, das nicht eingreift; die Obrigkeit, die nachgibt; die Masse, die sich der Faszination des Verführers ergibt. Die Machtübernahme durch Suggestion statt durch Legitimation spiegelt sich direkt in Cipollas Methoden wider.</p>
+<blockquote>»Er hatte Macht über uns. Aber er hatte sie nur, weil wir sie ihm gaben.«</blockquote>`
+    },
+    {
+      year: 1925, date: '3. Januar 1925', cat: 'ital',
+      title: 'Mussolini erklärt die Diktatur',
+      body: `<p>Nach dem Mord an dem sozialistischen Abgeordneten Giacomo Matteotti erklärt Mussolini vor dem Parlament offen die Diktatur: <em>»Ich übernehme die politische, moralische und historische Verantwortung.«</em> Die Pressefreiheit wird abgeschafft, politische Parteien verboten, Oppositionelle verhaftet oder ins Exil getrieben.</p>
+<p>In der Novelle lässt sich Cipollas unerschütterliches Beharren auf absoluter Autorität selbst bei offenem Widerspruch als Spiegel dieser Entwicklung lesen. Er reagiert auf Protest nicht mit Rückzug, sondern mit Eskalation:</p>
+<blockquote>»Er ließ uns nicht los. Er beanspruchte uns. Er demütigte uns — und wir blieben.«</blockquote>`
+    },
+    {
+      year: 1926, date: 'Sommer 1926', cat: 'nov',
+      title: 'Thomas Manns Urlaub in Torre di Venere',
+      body: `<p>Thomas Mann reist gemeinsam mit seiner Frau Katia und den Kindern an die toskanische Küste nach Forte dei Marmi und Torre di Venere. Er erlebt dort eine <strong>nationalistisch aufgeheizte Atmosphäre</strong>: Fremdenfeindlichkeit gegenüber deutschen Urlaubern, ein aggressiv-patriotischer Ton in Alltag und Presse, politische Einschüchterung als soziale Normalität.</p>
+<p>Dort besucht die Familie eine Varietévorstellung, bei der ein Hypnotiseur und Zauberkünstler das Publikum — darunter Manns Kinder — unter seinen Einfluss bringt. Mann beschreibt später, er habe in dieser Vorstellung etwas »Böses, Wirkliches« gespürt. Das Erlebnis wird zum unmittelbaren Ausgangspunkt der Novelle.</p>`
+    },
+    {
+      year: 1927, date: '1926–1928', cat: 'fasch',
+      title: 'Faschismus als europäische Massenbewegung',
+      body: `<p>In ganz Europa erstarken autoritäre und faschistische Bewegungen: In Deutschland wächst die NSDAP, in Ungarn, Polen, Rumänien und Spanien entstehen ähnliche Formationen. Der Faschismus nutzt gezielt das Massenspektakel — Propaganda, Inszenierung, emotionale Überwältigung — als politisches Instrument.</p>
+<p>Thomas Mann erkennt in der Bereitschaft des Publikums, sich von Cipolla führen zu lassen, das Wesen dieser politischen Dynamik. Die Passivität ist keine zufällige Feigheit — sie ist die <strong>eigentliche politische Aussage der Novelle</strong>:</p>
+<blockquote>»Er sprach, ohne aufzuhören. Und das Publikum hörte, ohne sich zu rühren. Das war das Schlimmste.«</blockquote>`
+    },
+    {
+      year: 1929, date: 'Frühjahr–Herbst 1929', cat: 'nov',
+      title: 'Niederschrift der Novelle in München',
+      body: `<p>Thomas Mann schreibt <em>Mario und der Zauberer</em> in München nieder. Er verdichtet seine persönlichen Urlaubserlebnisse von 1926 zu einer politischen Parabel. Der fiktive Kurort Torre di Venere steht dabei als <strong>Metapher für das faschistische Europa</strong> insgesamt — nicht nur für Italien.</p>
+<p>Mann arbeitet präzise an der erzählerischen Doppeldeutigkeit: Die Geschichte wird als scheinbar harmlose Urlaubserzählung präsentiert, doch die politische Dimension ist jederzeit spürbar. Der Erzähler weiß, dass etwas nicht stimmt — und bleibt dennoch. Diese Ambivalenz ist Absicht, nicht Schwäche:</p>
+<blockquote>»Wir hatten Grund zu gehen. Wir gingen nicht. Dies ist die eigentliche Geschichte.«</blockquote>`
+    },
+    {
+      year: 1929, date: 'Oktober 1929', cat: 'mann',
+      title: 'Nobelpreis für Literatur',
+      body: `<p>Thomas Mann wird mit dem Nobelpreis für Literatur ausgezeichnet — in erster Linie für die <em>Buddenbrooks</em>. Der Preis verschafft ihm weltweite Autorität und eine Plattform, von der aus er zunehmend politisch spricht und schreibt.</p>
+<p>Das Zusammentreffen von Nobelpreis und der unmittelbar bevorstehenden Veröffentlichung von <em>Mario und der Zauberer</em> ist bedeutsam: Mann nutzt seinen internationalen Ruhm gezielt, um politische Warnung in literarische Form zu kleiden. Die Novelle ist <strong>Kunstwerk und Zeitzeugnis</strong> zugleich — und wird als solches rezipiert.</p>`
+    },
+    {
+      year: 1930, date: 'Januar 1930', cat: 'nov',
+      title: 'Erstveröffentlichung im Fischer Verlag',
+      body: `<p><em>Mario und der Zauberer. Ein tragisches Reiseerlebnis</em> erscheint im S. Fischer Verlag, Berlin. Die politische Dimension wird sofort erkannt und vielfach diskutiert. Der Hypnotiseur Cipolla, der ein Publikum zu willenlosen Marionetten macht, wird allgemein als Allegorie auf Mussolini und den Faschismus gelesen.</p>
+<p>Thomas Mann hat sich zu dieser Lesart explizit bekannt und erklärt, die Novelle zeige, wie:</p>
+<blockquote>»die Freiheit des Willens — das Höchste, was der Mensch besitzt — unterhöhlt werden kann, sobald man aufhört, sie zu verteidigen.«</blockquote>
+<p>Die Gleichgültigkeit des Erzähler-Ichs ist dabei bewusst gesetzt: Es ist die Selbstkritik an der passiven Intelligenz, die dem Spektakel zuschaut und schweigt.</p>`
+    },
+    {
+      year: 1930, date: '14. September 1930', cat: 'pol',
+      title: 'NSDAP erhält 18 % — demokratischer Einbruch',
+      body: `<p>Bei den Reichstagswahlen erreicht die NSDAP aus dem Stand 18,3 % der Stimmen und wird zur zweitstärksten Partei im Reichstag. Der demokratische Rückhalt für die Weimarer Republik bricht rapide ein.</p>
+<p>Die Novelle erscheint in genau diesem politischen Moment. Der berühmte Satz des Erzählers bekommt dadurch eine unmittelbare Dringlichkeit, die weit über die Beschreibung einer Varietévorstellung hinausgeht:</p>
+<blockquote>»Warum gingen wir nicht? Wir blieben, weil man nicht geht, weil man sich das nicht gestattet. Es ist bequemer, zu bleiben.«</blockquote>
+<p>Thomas Mann beschreibt jene lähmende Passivität, die das Versagen der demokratischen Mitte gegenüber dem Faschismus kennzeichnete — und die er für gefährlicher hielt als offene Feindschaft.</p>`
+    },
+    {
+      year: 1933, date: '30. Januar 1933', cat: 'pol',
+      title: 'Hitler wird Reichskanzler',
+      body: `<p>Adolf Hitler wird von Reichspräsident Hindenburg zum Reichskanzler ernannt. Die Weimarer Republik endet faktisch mit dem Ermächtigungsgesetz vom 23. März 1933. Die Demokratie übergibt die Macht an den Verführer — genau wie Cipollas Publikum den Abend an den Zauberer.</p>
+<p>Rückblickend erscheint <em>Mario und der Zauberer</em> als prophetisches Werk. Der Moment, in dem Mario den Revolver zieht und Cipolla tötet, ist laut Mann nicht Triumph — er ist Tragödie, weil er zu spät kommt:</p>
+<blockquote>»Es war eine Befreiung — aber sie kam nach allem. Nach allem, was geschehen war.«</blockquote>
+<p>Der Schuss beendet die Vorstellung. Er beendet nicht die faschistische Welt.</p>`
+    },
+    {
+      year: 1933, date: 'Februar 1933', cat: 'mann',
+      title: 'Thomas Mann verlässt Deutschland',
+      body: `<p>Thomas Mann hält am 10. Februar 1933 in München seinen letzten öffentlichen Vortrag über Richard Wagner. Wenige Tage später reist er ins Ausland — er kehrt nicht zurück. Am 10. Mai 1933 werden seine Bücher auf dem Berliner Bebelplatz verbrannt.</p>
+<p>Mann begreift sofort: Die Prophezeiung der Novelle ist eingetroffen. Die Gesellschaft hat den Zauberer nicht gestoppt — sie hat ihm applaudiert. Aus dem Exil schreibt er:
+<blockquote>»Deutschland hat sich selbst verloren. Ich habe es nicht verlassen — es hat sich von mir entfernt.«</blockquote></p>`
+    },
+    {
+      year: 1936, date: '1936', cat: 'mann',
+      title: 'Ausbürgerung und offenes Bekenntnis',
+      body: `<p>Das NS-Regime erkennt Thomas Mann die deutsche Staatsbürgerschaft ab und entzieht ihm den Bonner Ehrendoktortitel. In seinem berühmten Antwortbrief an den Dekan der Bonner Universität erklärt Mann, er habe <em>»vom ersten Tag an«</em> gewusst, dass das Regime eine Katastrophe für Deutschland und die Welt bedeute.</p>
+<p>Sein Exilwerk und seine Radioansprachen an die Deutschen — gesendet über BBC und Voice of America — belegen, dass <em>Mario und der Zauberer</em> keine zufällige politische Parabel war. Sie war <strong>programmatische Warnung</strong>: Wer dem Zauberer applaudiert und die Unterhaltung genießt, macht sich mitschuldig.</p>`
+    },
+    {
+      year: 1955, date: '12. August 1955', cat: 'mann',
+      title: 'Tod Thomas Manns in Zürich',
+      body: `<p>Thomas Mann stirbt am 12. August 1955 in Zürich. Er hat Deutschland nach 1933 nie wieder als Heimat zurückerhalten. Sein Werk — insbesondere <em>Mario und der Zauberer</em> — gehört heute zum Kernbestand der deutschen Literatur des 20. Jahrhunderts und wird weltweit als Warnung vor Autoritarismus, politischer Verführung und kollektiver Passivität gelesen.</p>
+<p>Die Novelle endet mit einem der bekanntesten Schlusssätze der deutschen Literatur:</p>
+<blockquote>»Ein Ende mit Schrecken, ein Ende mit einem Schlag, Befreiung — ja, das war es, das musste sein. Aber ein Ende, das auch ein Anfang war.«</blockquote>
+<p>Thomas Mann lässt offen, was beginnt. Er lässt offen, ob das Erschießen eines Verführers die Welt verändert — oder ob der nächste Cipolla bereits wartet.</p>`
+    }
+  ];
 
-            getCategories().forEach(category => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn';
-                if (category === 'Alle') {
-                    btn.classList.add('active');
-                }
-                btn.textContent = category;
-                btn.onclick = () => filterTimeline(category, btn);
-                filterContainer.appendChild(btn);
-            });
-        }
+  /* ── BUILD TIMELINE ── */
+  let activeFilter = 'all';
+  let sideCounter  = 0;
 
-        function filterTimeline(category, btn) {
-            // Button-Status aktualisieren
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+  function buildTimeline(filter) {
+    const body = document.getElementById('timeline-body');
+    body.innerHTML = '';
+    sideCounter = 0;
+    let lastYear = null;
 
-            currentFilter = category === 'Alle' ? null : category;
-            updateTimelineDisplay();
-        }
+    EVENTS.forEach((ev, idx) => {
+      const visible = filter === 'all' || ev.cat === filter;
 
-        function updateTimelineDisplay() {
-            const timeline = document.getElementById('timeline');
-            timeline.innerHTML = '';
+      if (ev.year !== lastYear && visible) {
+        const ym = document.createElement('div');
+        ym.className = 'year-marker';
+        ym.innerHTML = `<span class="year-bubble">${ev.year}</span>`;
+        body.appendChild(ym);
+        lastYear = ev.year;
+      }
 
-            const filteredData = currentFilter 
-                ? timelineData.filter(item => item.category === currentFilter)
-                : timelineData;
+      if (!visible) return;
 
-            filteredData.forEach((item, index) => {
-                const originalIndex = timelineData.indexOf(item);
-                const timelineItem = document.createElement('div');
-                timelineItem.className = 'timeline-item';
+      const side = sideCounter % 2 === 0 ? 'right' : 'left';
+      sideCounter++;
 
-                const card = document.createElement('div');
-                card.className = 'timeline-card';
-                card.onclick = () => openModal(originalIndex);
+      const row = document.createElement('div');
+      row.className = 'event-row';
+      row.dataset.idx = idx;
 
-                const categoryClass = 'category-' + item.category.replace(/ \/ /g, '-').replace(/ /g, '-');
-                
-                card.innerHTML = `
-                    <div>
-                        <div class="card-year">${item.year}</div>
-                        <div class="card-category ${categoryClass}">${item.category}</div>
-                    </div>
-                `;
+      const catLabel = CAT_LABELS[ev.cat];
 
-                timelineItem.appendChild(card);
-                timeline.appendChild(timelineItem);
-            });
-        }
+      if (side === 'right') {
+        row.innerHTML = `
+          <div class="event-slot left empty"></div>
+          <div class="spine-col">
+            <div class="spine-dot dot-${ev.cat}" aria-hidden="true"></div>
+          </div>
+          <div class="event-slot right">
+            <div class="event-card card-${ev.cat}" tabindex="0" role="button" aria-label="${ev.title}" onclick="openDetail(${idx})">
+              <span class="card-cat-tag tag-${ev.cat}">${catLabel}</span>
+              <div class="card-title">${ev.title}</div>
+              <div class="card-date">${ev.date}</div>
+              <span class="card-arrow" aria-hidden="true">→</span>
+            </div>
+          </div>`;
+      } else {
+        row.innerHTML = `
+          <div class="event-slot left">
+            <div class="event-card card-${ev.cat}" tabindex="0" role="button" aria-label="${ev.title}" onclick="openDetail(${idx})">
+              <span class="card-cat-tag tag-${ev.cat}">${catLabel}</span>
+              <div class="card-title">${ev.title}</div>
+              <div class="card-date">${ev.date}</div>
+              <span class="card-arrow" aria-hidden="true">→</span>
+            </div>
+          </div>
+          <div class="spine-col">
+            <div class="spine-dot dot-${ev.cat}" aria-hidden="true"></div>
+          </div>
+          <div class="event-slot right empty"></div>`;
+      }
 
-        // ====== Timeline initialisieren ======
-        function initTimeline() {
-            initFilters();
-            updateTimelineDisplay();
-        }
+      body.appendChild(row);
 
-        // ====== Modal öffnen ======
-        function openModal(index) {
-            const item = timelineData[index];
-            const categoryClass = 'category-' + item.category.replace(/ \/ /g, '-').replace(/ /g, '-');
-            
-            document.getElementById('modalCategory').textContent = item.category;
-            document.getElementById('modalCategory').className = 'modal-category ' + categoryClass;
-            document.getElementById('modalImage').src = item.image;
-            document.getElementById('modalYear').textContent = item.year;
-            document.getElementById('modalTitle').textContent = item.title;
-            document.getElementById('modalDescription').textContent = item.description;
-            
-            // Novel Connection anzeigen/verbergen
-            const novelConnectionSection = document.getElementById('novelConnectionSection');
-            if (item.novelConnection) {
-                document.getElementById('modalNovelConnection').textContent = item.novelConnection;
-                novelConnectionSection.style.display = 'block';
-            } else {
-                novelConnectionSection.style.display = 'none';
-            }
-            
-            // Quote anzeigen/verbergen
-            const quoteSection = document.getElementById('quoteSection');
-            if (item.quote) {
-                document.getElementById('modalQuote').textContent = item.quote;
-                quoteSection.style.display = 'block';
-            } else {
-                quoteSection.style.display = 'none';
-            }
-            
-            document.getElementById('detailModal').classList.add('active');
-        }
+      /* keyboard support */
+      row.querySelector('.event-card').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(idx); }
+      });
+    });
+  }
 
-        // ====== Modal schließen ======
-        function closeModal() {
-            document.getElementById('detailModal').classList.remove('active');
-        }
+  /* ── DETAIL PANEL ── */
+  function openDetail(idx) {
+    const ev = EVENTS[idx];
+    document.getElementById('detail-badge-el').className = `detail-badge badge-${ev.cat}`;
+    document.getElementById('detail-badge-el').innerHTML = CAT_LABELS[ev.cat];
+    document.getElementById('detail-title-el').textContent = ev.title;
+    document.getElementById('detail-date-el').textContent  = ev.date;
+    document.getElementById('detail-body-el').innerHTML    = ev.body;
+    const overlay = document.getElementById('detail-overlay');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('detail-close-btn').focus();
+  }
 
-        // ====== Modal bei Klick auf Hintergrund schließen ======
-        window.onclick = function(event) {
-            const modal = document.getElementById('detailModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
+  function closeDetail() {
+    document.getElementById('detail-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
-        // ====== Escape-Taste zum Schließen ======
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
+  document.getElementById('detail-close-btn').addEventListener('click', closeDetail);
+  document.getElementById('detail-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDetail();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
-        // ====== Initialisierung beim Laden der Seite ======
-        initTimeline();
-    </script>
+  /* ── FILTER BUTTONS ── */
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const cat = this.dataset.cat;
+      activeFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.className = 'filter-btn';
+      });
+      this.classList.add(`active-${cat}`);
+      buildTimeline(cat);
+    });
+  });
+
+  /* ── INIT ── */
+  buildTimeline('all');
+  </script>
+
 </body>
 </html>
