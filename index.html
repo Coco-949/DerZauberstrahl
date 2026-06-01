@@ -390,6 +390,46 @@
     .detail-body em { font-style: italic; }
     .detail-body strong { font-weight: 600; color: var(--ink); }
 
+    /* ─── DETAIL IMAGE ─── */
+    .detail-image-wrap {
+      margin: 1.5rem 0;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--rule);
+    }
+    .detail-image-wrap img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .detail-image-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      height: 200px;
+      background: var(--bg2);
+      color: var(--ink4);
+      font-size: 12px;
+      font-family: var(--body);
+      letter-spacing: 0.05em;
+    }
+    .detail-image-placeholder svg {
+      opacity: 0.4;
+    }
+    .detail-image-caption {
+      padding: 0.5rem 0.75rem;
+      font-size: 11px;
+      color: var(--ink4);
+      font-style: italic;
+      background: var(--bg2);
+      border-top: 1px solid var(--rule2);
+      text-align: center;
+    }
+
     /* ─── FOOTER ─── */
     .site-footer {
       position: relative; z-index: 1;
@@ -510,6 +550,26 @@
       <h2 class="detail-title" id="detail-title-el"></h2>
       <p class="detail-date"  id="detail-date-el"></p>
       <div class="detail-rule" aria-hidden="true"></div>
+
+      <!-- BILD-PLATZHALTER: src durch echten Bildpfad ersetzen, data-caption für Bildunterschrift -->
+      <div class="detail-image-wrap" id="detail-image-wrap" style="display:none;">
+        <img id="detail-image-el" src="" alt="" />
+        <div class="detail-image-caption" id="detail-image-caption-el"></div>
+      </div>
+
+      <!-- BILD-PLATZHALTER (solange kein Bild gesetzt ist) -->
+      <div class="detail-image-wrap" id="detail-image-placeholder">
+        <div class="detail-image-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <span>Bild-Platzhalter — Pfad in <code>ev.image</code> eintragen</span>
+        </div>
+        <div class="detail-image-caption">Bildunterschrift in <code>ev.imageCaption</code> eintragen</div>
+      </div>
+
       <div class="detail-body" id="detail-body-el"></div>
     </div>
   </div>
@@ -532,119 +592,147 @@
     {
       year: 1875, date: '6. Juni 1875', cat: 'mann',
       title: 'Geburt Thomas Manns in Lübeck',
+      image: 'Thomas-Mann-Jung.jpg',
+      imageCaption: 'Thomas Mann, 1893 - Quelle: ETH Bibliothek Zürich TMA',
       body: `<p>Thomas Mann wird in Lübeck als zweiter Sohn des Senators Thomas Johann Heinrich Mann und seiner Frau Julia da Silva-Bruhns geboren. Das bürgerliche Elternhaus und die hanseatische Kaufmannstradition prägen sein späteres Werk: Der Spannungsbogen zwischen Bürgertum und Künstlertum wird zum zentralen Lebensthema.</p>
 <p>Diese privilegierte Herkunft ermöglicht ihm eine umfassende Bildung und den Zugang zur europäischen Geistesgeschichte — die Grundlage für sein späteres politisches Urteil und die Fähigkeit, gesellschaftliche Zerfallsprozesse literarisch zu fassen.</p>`
     },
     {
       year: 1901, date: '1901', cat: 'mann',
       title: '»Buddenbrooks« erscheinen',
+      image: 'Buddenbrooks.jpg',
+      imageCaption: 'Buddenbrooks-Erstdruck von 1901',
       body: `<p>Mit dem Roman <em>Buddenbrooks. Verfall einer Familie</em> gelingt Thomas Mann sein literarischer Durchbruch. Das Werk schildert den Niedergang einer Lübecker Kaufmannsfamilie über mehrere Generationen — und etabliert den <strong>Verfall als literarisches Prinzip</strong>.</p>
 <p>Schon hier erprobt Mann, was er in <em>Mario und der Zauberer</em> konsequent auf die politische Realität überträgt: die Fähigkeit, gesellschaftliche Erosion, Schwäche und Kapitulation in Prosa zu zeigen. Der Beobachter, der zu lange schaut und zu spät handelt, ist eine der tragenden Figuren seines gesamten Werks.</p>`
     },
     {
       year: 1918, date: '1915–1918', cat: 'mann',
       title: '»Betrachtungen eines Unpolitischen«',
+      image: 'Betrachtung.jpg',
+      imageCaption: 'Erstausgabe der »Betrachtungen eines Unpolitischen«, 1918',
       body: `<p>Während des Ersten Weltkrieges verfasst Thomas Mann die <em>Betrachtungen eines Unpolitischen</em> (erschienen 1918). Er verteidigt darin einen deutschen Sonderweg und unterscheidet scharf zwischen »Kultur« (deutsch, tief, innerlich) und »Zivilisation« (westlich, oberflächlich, demokratisch).</p>
 <p>Dieser Text ist für das Verständnis von <em>Mario und der Zauberer</em> entscheidend: Mann schreibt die Novelle als <strong>gewandelter Humanist und Demokrat</strong>. Die Selbstkritik an seiner früheren nationalistischen Haltung fließt direkt in die Gestaltung ein — der Erzähler, der zu lange bleibt und schaut, ist auch ein Selbstporträt des politisch zögerlichen Intellektuellen.</p>`
     },
     {
       year: 1919, date: '1919', cat: 'pol',
       title: 'Gründung der Weimarer Republik',
+      image: 'Weimar.jpg',
+      imageCaption: 'Gedenktafel zur namen- und verfassunggebenden Weimarer Nationalversammlung am Großen Haus des Deutschen Nationaltheaters in Weimar',
       body: `<p>Nach dem Ersten Weltkrieg entsteht in Deutschland die Weimarer Republik — die erste parlamentarische Demokratie des Landes. Von Anfang an kämpft sie mit politischer Instabilität, Hyperinflation, Massenarbeitslosigkeit und dem nationalen Trauma der Kriegsniederlage.</p>
 <p>Das Versagen demokratischer Institutionen gegenüber autoritären Verführern ist ein Kernthema der Novelle. Der Erzähler beobachtet Cipollas Übergriffe, protestiert kaum und bleibt — ein Bild für die Passivität der deutschen Mitte:</p>
-<blockquote>»Wir blieben [...]. Es war schon zu spät.«</blockquote>
+<blockquote>»Wir blieben [...]. [...] dass wir sie noch nicht fortgeschafft hatten, kann ich mir nur mit einer gewissen Ansteckung durch die allgemeine Fahrlässigkeit erklären, [...].«</blockquote>
 <p>Thomas Mann richtet diese Warnung direkt an eine Gesellschaft, die sich durch Tatenlosigkeit selbst preisgibt.</p>`
     },
     {
       year: 1921, date: '1921', cat: 'fasch',
       title: 'Mussolini gründet die faschistische Partei',
+      image: 'Mussolini.jpg',
+      imageCaption: 'Benito Mussolini (1940), Farbfoto von Henri Roger-Viollet',
       body: `<p>Benito Mussolini gründet die <em>Partito Nazionale Fascista</em>. Das faschistische Programm verbindet extremen Nationalismus, den Kult der Gewalt, Führerprinzip und die rücksichtslose Unterdrückung aller Opposition.</p>
 <p>Der Zauberer Cipolla in Manns Novelle verkörpert exakt diese Merkmale — er dominiert durch psychische Gewalt, demütigt das Publikum systematisch und beweist die Macht der Suggestion über den freien Willen. Mann beschreibt ihn als:</p>
-<blockquote>»einen Diktator der Unterhaltung, der sein Publikum zwang, sich selbst zu erniedrigen — und dem das Publikum applaudierte.«</blockquote>`
+<blockquote>einen Diktator der Unterhaltung, der sein Publikum zwang, sich selbst zu erniedrigen — und dem das Publikum applaudierte.</blockquote>`
     },
     {
       year: 1922, date: '28. Oktober 1922', cat: 'ital',
       title: 'Marsch auf Rom — Mussolini an der Macht',
+      image: 'Marsch.png',
+      imageCaption: 'Faschisten auf dem Weg nach Rom, 28. Oktober 1922',
       body: `<p>Mussolinis Schwarzhemden marschieren auf Rom. König Viktor Emanuel III. ernennt Mussolini ohne Gegenwehr zum Ministerpräsidenten. Eine parlamentarische Demokratie kapituliert vor politischer Einschüchterung — ohne Schuss, ohne Widerstand.</p>
-<p>Dieser Moment ist das historische Vorbild für die Atmosphäre der Novelle: das Publikum, das nicht eingreift; die Obrigkeit, die nachgibt; die Masse, die sich der Faszination des Verführers ergibt. Die Machtübernahme durch Suggestion statt durch Legitimation spiegelt sich direkt in Cipollas Methoden wider.</p>
-<blockquote>»Er hatte Macht über uns. Aber er hatte sie nur, weil wir sie ihm gaben.«</blockquote>`
+<p>Dieser Moment ist das historische Vorbild für die Atmosphäre der Novelle: das Publikum, das nicht eingreift; die Obrigkeit, die nachgibt; die Masse, die sich der Faszination des Verführers ergibt. Die Machtübernahme durch Suggestion statt durch Legitimation spiegelt sich direkt in Cipollas Methoden wider.</p>`
     },
     {
       year: 1925, date: '3. Januar 1925', cat: 'ital',
       title: 'Mussolini erklärt die Diktatur',
+      image: 'Flagge.png',
+      imageCaption: 'Persönliche Flagge Mussolinis als diktatorischer Capo del governo',
       body: `<p>Nach dem Mord an dem sozialistischen Abgeordneten Giacomo Matteotti erklärt Mussolini vor dem Parlament offen die Diktatur: <em>»Ich übernehme die politische, moralische und historische Verantwortung.«</em> Die Pressefreiheit wird abgeschafft, politische Parteien verboten, Oppositionelle verhaftet oder ins Exil getrieben.</p>
 <p>In der Novelle lässt sich Cipollas unerschütterliches Beharren auf absoluter Autorität selbst bei offenem Widerspruch als Spiegel dieser Entwicklung lesen. Er reagiert auf Protest nicht mit Rückzug, sondern mit Eskalation:</p>
-<blockquote>»Er ließ uns nicht los. Er beanspruchte uns. Er demütigte uns — und wir blieben.«</blockquote>`
+<blockquote>Er ließ sie nicht los. Er beanspruchte sie. Er demütigte sie — und sie blieben.</blockquote>`
     },
     {
       year: 1926, date: 'Sommer 1926', cat: 'nov',
       title: 'Thomas Manns Urlaub in Torre di Venere',
+      image: 'Torre.jpg',
+      imageCaption: 'Blick von Lerici auf Porto Venere',
       body: `<p>Thomas Mann reist gemeinsam mit seiner Frau Katia und den Kindern an die toskanische Küste nach Forte dei Marmi und Torre di Venere. Er erlebt dort eine <strong>nationalistisch aufgeheizte Atmosphäre</strong>: Fremdenfeindlichkeit gegenüber deutschen Urlaubern, ein aggressiv-patriotischer Ton in Alltag und Presse, politische Einschüchterung als soziale Normalität.</p>
 <p>Dort besucht die Familie eine Varietévorstellung, bei der ein Hypnotiseur und Zauberkünstler das Publikum — darunter Manns Kinder — unter seinen Einfluss bringt. Mann beschreibt später, er habe in dieser Vorstellung etwas »Böses, Wirkliches« gespürt. Das Erlebnis wird zum unmittelbaren Ausgangspunkt der Novelle.</p>`
     },
     {
       year: 1927, date: '1926–1928', cat: 'fasch',
       title: 'Faschismus als europäische Massenbewegung',
+      image: 'Faschismus.jpg',
+      imageCaption: 'Faschismus in verschiedenen Sprachen',
       body: `<p>In ganz Europa erstarken autoritäre und faschistische Bewegungen: In Deutschland wächst die NSDAP, in Ungarn, Polen, Rumänien und Spanien entstehen ähnliche Formationen. Der Faschismus nutzt gezielt das Massenspektakel — Propaganda, Inszenierung, emotionale Überwältigung — als politisches Instrument.</p>
-<p>Thomas Mann erkennt in der Bereitschaft des Publikums, sich von Cipolla führen zu lassen, das Wesen dieser politischen Dynamik. Die Passivität ist keine zufällige Feigheit — sie ist die <strong>eigentliche politische Aussage der Novelle</strong>:</p>
-<blockquote>»Er sprach, ohne aufzuhören. Und das Publikum hörte, ohne sich zu rühren. Das war das Schlimmste.«</blockquote>`
+<p>Thomas Mann erkennt in der Bereitschaft des Publikums, sich von Cipolla führen zu lassen, das Wesen dieser politischen Dynamik. Die Passivität ist keine zufällige Feigheit — sie ist die <strong>eigentliche politische Aussage der Novelle</strong>.</p>`
     },
     {
       year: 1929, date: 'Frühjahr–Herbst 1929', cat: 'nov',
       title: 'Niederschrift der Novelle in München',
+      image: 'München.jpg',
+      imageCaption: 'Odeonsplatz in München',
       body: `<p>Thomas Mann schreibt <em>Mario und der Zauberer</em> in München nieder. Er verdichtet seine persönlichen Urlaubserlebnisse von 1926 zu einer politischen Parabel. Der fiktive Kurort Torre di Venere steht dabei als <strong>Metapher für das faschistische Europa</strong> insgesamt — nicht nur für Italien.</p>
-<p>Mann arbeitet präzise an der erzählerischen Doppeldeutigkeit: Die Geschichte wird als scheinbar harmlose Urlaubserzählung präsentiert, doch die politische Dimension ist jederzeit spürbar. Der Erzähler weiß, dass etwas nicht stimmt — und bleibt dennoch. Diese Ambivalenz ist Absicht, nicht Schwäche:</p>
-<blockquote>»Wir hatten Grund zu gehen. Wir gingen nicht. Dies ist die eigentliche Geschichte.«</blockquote>`
+<p>Mann arbeitet präzise an der erzählerischen Doppeldeutigkeit: Die Geschichte wird als scheinbar harmlose Urlaubserzählung präsentiert, doch die politische Dimension ist jederzeit spürbar. Der Erzähler weiß, dass etwas nicht stimmt — und bleibt dennoch. Diese Ambivalenz ist Absicht, nicht Schwäche.</p>`
     },
     {
       year: 1929, date: 'Oktober 1929', cat: 'mann',
       title: 'Nobelpreis für Literatur',
+      image: 'Nobell.jpg',
+      imageCaption: 'Nobellpreis für Literatur',
       body: `<p>Thomas Mann wird mit dem Nobelpreis für Literatur ausgezeichnet — in erster Linie für die <em>Buddenbrooks</em>. Der Preis verschafft ihm weltweite Autorität und eine Plattform, von der aus er zunehmend politisch spricht und schreibt.</p>
 <p>Das Zusammentreffen von Nobelpreis und der unmittelbar bevorstehenden Veröffentlichung von <em>Mario und der Zauberer</em> ist bedeutsam: Mann nutzt seinen internationalen Ruhm gezielt, um politische Warnung in literarische Form zu kleiden. Die Novelle ist <strong>Kunstwerk und Zeitzeugnis</strong> zugleich — und wird als solches rezipiert.</p>`
     },
     {
       year: 1930, date: 'Januar 1930', cat: 'nov',
       title: 'Erstveröffentlichung im Fischer Verlag',
+      image: 'Zauber.webp',
+      imageCaption: 'Erstausgabe von »Mario und der Zauberer«',
       body: `<p><em>Mario und der Zauberer. Ein tragisches Reiseerlebnis</em> erscheint im S. Fischer Verlag, Berlin. Die politische Dimension wird sofort erkannt und vielfach diskutiert. Der Hypnotiseur Cipolla, der ein Publikum zu willenlosen Marionetten macht, wird allgemein als Allegorie auf Mussolini und den Faschismus gelesen.</p>
-<p>Thomas Mann hat sich zu dieser Lesart explizit bekannt und erklärt, die Novelle zeige, wie:</p>
-<blockquote>»die Freiheit des Willens — das Höchste, was der Mensch besitzt — unterhöhlt werden kann, sobald man aufhört, sie zu verteidigen.«</blockquote>
+<p>Thomas Mann hat sich zu dieser Lesart explizit bekannt.</p>
+
 <p>Die Gleichgültigkeit des Erzähler-Ichs ist dabei bewusst gesetzt: Es ist die Selbstkritik an der passiven Intelligenz, die dem Spektakel zuschaut und schweigt.</p>`
     },
     {
       year: 1930, date: '14. September 1930', cat: 'pol',
       title: 'NSDAP erhält 18 % — demokratischer Einbruch',
+      image: 'NSDAP.png',
+      imageCaption: 'NSDAP Logo',
       body: `<p>Bei den Reichstagswahlen erreicht die NSDAP aus dem Stand 18,3 % der Stimmen und wird zur zweitstärksten Partei im Reichstag. Der demokratische Rückhalt für die Weimarer Republik bricht rapide ein.</p>
-<p>Die Novelle erscheint in genau diesem politischen Moment. Der berühmte Satz des Erzählers bekommt dadurch eine unmittelbare Dringlichkeit, die weit über die Beschreibung einer Varietévorstellung hinausgeht:</p>
-<blockquote>»Warum gingen wir nicht? Wir blieben, weil man nicht geht, weil man sich das nicht gestattet. Es ist bequemer, zu bleiben.«</blockquote>
-<p>Thomas Mann beschreibt jene lähmende Passivität, die das Versagen der demokratischen Mitte gegenüber dem Faschismus kennzeichnete — und die er für gefährlicher hielt als offene Feindschaft.</p>`
+<p>Die Novelle erscheint in genau diesem politischen Moment.</p>
+
+<p>Thomas Mann beschreibt die lähmende Passivität, die das Versagen der demokratischen Mitte gegenüber dem Faschismus kennzeichnete — und die er für gefährlicher hielt als offene Feindschaft.</p>`
     },
     {
       year: 1933, date: '30. Januar 1933', cat: 'pol',
       title: 'Hitler wird Reichskanzler',
+      image: 'Ernennung.jpg',
+      imageCaption: '30. Januar 1933 - Adolf Hitler wird Reichskanzler, Stichtag - Stichtag',
       body: `<p>Adolf Hitler wird von Reichspräsident Hindenburg zum Reichskanzler ernannt. Die Weimarer Republik endet faktisch mit dem Ermächtigungsgesetz vom 23. März 1933. Die Demokratie übergibt die Macht an den Verführer — genau wie Cipollas Publikum den Abend an den Zauberer.</p>
-<p>Rückblickend erscheint <em>Mario und der Zauberer</em> als prophetisches Werk. Der Moment, in dem Mario den Revolver zieht und Cipolla tötet, ist laut Mann nicht Triumph — er ist Tragödie, weil er zu spät kommt:</p>
-<blockquote>»Es war eine Befreiung — aber sie kam nach allem. Nach allem, was geschehen war.«</blockquote>
+<p>Rückblickend erscheint <em>Mario und der Zauberer</em> als prophetisches Werk. Der Moment, in dem Mario den Revolver zieht und Cipolla tötet, ist laut Mann nicht Triumph — er ist Tragödie:</p>
+<blockquote>»Und ein befreiendes Ende dennoch, - ich konnte und kann nicht umhin, es so zu empfinden.«</blockquote>
 <p>Der Schuss beendet die Vorstellung. Er beendet nicht die faschistische Welt.</p>`
     },
     {
       year: 1933, date: 'Februar 1933', cat: 'mann',
       title: 'Thomas Mann verlässt Deutschland',
+      image: 'Verbrennung.jpg',
+      imageCaption: 'Verbrennung von Büchern am Berliner Bebelplatz, 10',
       body: `<p>Thomas Mann hält am 10. Februar 1933 in München seinen letzten öffentlichen Vortrag über Richard Wagner. Wenige Tage später reist er ins Ausland — er kehrt nicht zurück. Am 10. Mai 1933 werden seine Bücher auf dem Berliner Bebelplatz verbrannt.</p>
-<p>Mann begreift sofort: Die Prophezeiung der Novelle ist eingetroffen. Die Gesellschaft hat den Zauberer nicht gestoppt — sie hat ihm applaudiert. Aus dem Exil schreibt er:
-<blockquote>»Deutschland hat sich selbst verloren. Ich habe es nicht verlassen — es hat sich von mir entfernt.«</blockquote></p>`
+<p>Mann begreift sofort: Die Prophezeiung der Novelle ist eingetroffen. Die Gesellschaft hat den Zauberer nicht gestoppt — sie hat ihm applaudiert.</p>`
     },
     {
       year: 1936, date: '1936', cat: 'mann',
       title: 'Ausbürgerung und offenes Bekenntnis',
+      image: 'Ausgrenzung.png',
+      imageCaption: 'Illustration zur verdeutlichten Ausgrenzung von Thomas Mann',
       body: `<p>Das NS-Regime erkennt Thomas Mann die deutsche Staatsbürgerschaft ab und entzieht ihm den Bonner Ehrendoktortitel. In seinem berühmten Antwortbrief an den Dekan der Bonner Universität erklärt Mann, er habe <em>»vom ersten Tag an«</em> gewusst, dass das Regime eine Katastrophe für Deutschland und die Welt bedeute.</p>
 <p>Sein Exilwerk und seine Radioansprachen an die Deutschen — gesendet über BBC und Voice of America — belegen, dass <em>Mario und der Zauberer</em> keine zufällige politische Parabel war. Sie war <strong>programmatische Warnung</strong>: Wer dem Zauberer applaudiert und die Unterhaltung genießt, macht sich mitschuldig.</p>`
     },
     {
       year: 1955, date: '12. August 1955', cat: 'mann',
       title: 'Tod Thomas Manns in Zürich',
+      image: 'Tod.jpg',
+      imageCaption: 'Thomas Manns Grab in Zürich, 1955',
       body: `<p>Thomas Mann stirbt am 12. August 1955 in Zürich. Er hat Deutschland nach 1933 nie wieder als Heimat zurückerhalten. Sein Werk — insbesondere <em>Mario und der Zauberer</em> — gehört heute zum Kernbestand der deutschen Literatur des 20. Jahrhunderts und wird weltweit als Warnung vor Autoritarismus, politischer Verführung und kollektiver Passivität gelesen.</p>
-<p>Die Novelle endet mit einem der bekanntesten Schlusssätze der deutschen Literatur:</p>
-<blockquote>»Ein Ende mit Schrecken, ein Ende mit einem Schlag, Befreiung — ja, das war es, das musste sein. Aber ein Ende, das auch ein Anfang war.«</blockquote>
 <p>Thomas Mann lässt offen, was beginnt. Er lässt offen, ob das Erschießen eines Verführers die Welt verändert — oder ob der nächste Cipolla bereits wartet.</p>`
     }
   ];
@@ -728,6 +816,25 @@
     document.getElementById('detail-title-el').textContent = ev.title;
     document.getElementById('detail-date-el').textContent  = ev.date;
     document.getElementById('detail-body-el').innerHTML    = ev.body;
+
+    // Bild-Logik: ev.image (Pfad) und ev.imageCaption (optional)
+    const imgWrap        = document.getElementById('detail-image-wrap');
+    const imgEl          = document.getElementById('detail-image-el');
+    const imgCapEl       = document.getElementById('detail-image-caption-el');
+    const imgPlaceholder = document.getElementById('detail-image-placeholder');
+
+    if (ev.image) {
+      imgEl.src              = ev.image;
+      imgEl.alt              = ev.imageCaption || ev.title;
+      imgCapEl.textContent   = ev.imageCaption || '';
+      imgCapEl.style.display = ev.imageCaption ? '' : 'none';
+      imgWrap.style.display  = '';
+      imgPlaceholder.style.display = 'none';
+    } else {
+      imgWrap.style.display        = 'none';
+      imgPlaceholder.style.display = '';
+    }
+
     const overlay = document.getElementById('detail-overlay');
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -760,6 +867,132 @@
 
   /* ── INIT ── */
   buildTimeline('all');
+
+  /* ── SCROLL SWOOSH KONTINUIERLICH ── */
+  (function() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let lastScrollY = window.scrollY;
+    let lastScrollTime = performance.now();
+    let stopTimeout = null;
+    let isPlaying = false;
+
+    // Nodes persistent halten
+    let noise, bp, bp2, gain, gain2;
+
+    function buildGraph() {
+      const bufferSize = audioCtx.sampleRate * 4; // 4s Loop-Buffer
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+
+      noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const noise2src = audioCtx.createBufferSource();
+      noise2src.buffer = buffer;
+      noise2src.loop = true;
+      noise2src.loopStart = 0.3; // versetzt für Stereobreite
+
+      bp = audioCtx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 80;
+      bp.Q.value = 1.6;
+
+      bp2 = audioCtx.createBiquadFilter();
+      bp2.type = 'bandpass';
+      bp2.frequency.value = 65;
+      bp2.Q.value = 1.0;
+
+      gain = audioCtx.createGain();
+      gain.gain.value = 0;
+
+      gain2 = audioCtx.createGain();
+      gain2.gain.value = 0;
+
+      noise.connect(bp);
+      bp.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      noise2src.connect(bp2);
+      bp2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+
+      noise.start();
+      noise2src.start();
+    }
+
+    function startSwoosh(speed) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (!noise) buildGraph();
+
+      const now = audioCtx.currentTime;
+      const vol = Math.min(0.28, 0.09 + speed * 0.0013);
+
+      // Frequenz: beim Starten von hoch nach tief sweepen
+      if (!isPlaying) {
+        bp.frequency.cancelScheduledValues(now);
+        bp.frequency.setValueAtTime(900, now);
+        bp.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+
+        bp2.frequency.cancelScheduledValues(now);
+        bp2.frequency.setValueAtTime(700, now + 0.03);
+        bp2.frequency.exponentialRampToValueAtTime(65, now + 0.33);
+      }
+
+      // Lautstärke einblenden
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(vol, now + 0.05);
+
+      gain2.gain.cancelScheduledValues(now);
+      gain2.gain.setValueAtTime(gain2.gain.value, now);
+      gain2.gain.linearRampToValueAtTime(vol * 0.6, now + 0.05);
+
+      isPlaying = true;
+    }
+
+    function stopSwoosh() {
+      if (!isPlaying) return;
+      const now = audioCtx.currentTime;
+
+      // Frequenz: beim Stoppen nach unten fallen lassen
+      bp.frequency.cancelScheduledValues(now);
+      bp.frequency.setValueAtTime(bp.frequency.value, now);
+      bp.frequency.exponentialRampToValueAtTime(40, now + 0.35);
+
+      bp2.frequency.cancelScheduledValues(now);
+      bp2.frequency.setValueAtTime(bp2.frequency.value, now);
+      bp2.frequency.exponentialRampToValueAtTime(35, now + 0.38);
+
+      // Lautstärke ausblenden
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+
+      gain2.gain.cancelScheduledValues(now);
+      gain2.gain.setValueAtTime(gain2.gain.value, now);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+
+      isPlaying = false;
+    }
+
+    window.addEventListener('scroll', function() {
+      const now = performance.now();
+      const currentY = window.scrollY;
+      const dt = Math.max(1, now - lastScrollTime);
+      const speed = Math.abs(currentY - lastScrollY) / dt * 16;
+
+      lastScrollY = currentY;
+      lastScrollTime = now;
+
+      if (speed > 2) startSwoosh(speed);
+
+      // Stopp-Timer zurücksetzen — stoppt wenn kein Scroll mehr kommt
+      clearTimeout(stopTimeout);
+      stopTimeout = setTimeout(stopSwoosh, 80);
+    }, { passive: true });
+  })();
   </script>
 
 </body>
